@@ -1,0 +1,8 @@
+node_modules/
+*.log
+.DS_Store
+__pycache__/
+
+# build output and the local site database (tools/build_dist.js, tools/serve.py)
+dist/
+/data/
