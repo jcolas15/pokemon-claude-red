@@ -154,14 +154,14 @@ Object.assign(G.TEXT, {
 // text/CeladonMansion3F.asm
 Object.assign(G.TEXT, {
   CeladonMansion3FProgrammerText: "Who, me? Yeah nah, I'm the programmer here, bro!\fWell, Claude's the programmer. I've got 20 agents going on spawnd.dev.\fI type 'make it mean, chur', then paddle out for a surf. Sweet as!",
-  CeladonMansion3FGraphicArtistText: "Kia ora! I'm the graphic artist! I drew your sprite, hard out!\f...Okay, Claude drew it, pixel by pixel. But I picked the red hat, bro!\fThen I grabbed a flat white. Big day, eh.",
+  CeladonMansion3FGraphicArtistText: "Kia ora! I'm the graphic artist! I drew your sprite, hard out!\f...Okay, Claude drew it, pixel by pixel. But I picked the red hat, bro!\fThen I grabbed a long black. Big day, eh.",
   CeladonMansion3FWriterText: "I'm the writer, bro! I wrote the whole story!\fWell, I typed 'like POKéMON RED, but funnier'. Claude did the rest.\fDon't you reckon ERIKA's charming? MISTY's choice too!\fOh, and SABRINA — stoked on her as well!",
   CeladonMansion3FGameDesignerText: "Oh, yeah? Sweet as!\fI'm the game designer! I design the prompts that design the game.\fCompleting the POKéDEX is hard out, bro, but stick with it!\fCome find me once you've finished it! Chur!",
   CeladonMansion3FGameDesignerCompletedDexText: "Mean as, bro! You actually completed the POKéDEX! Congrats!\fThat's more than any of us has ever finished! The agents made you this!",
-  CeladonMansion3FGameProgramPCText: "It's a Claude terminal, running the game's code!\f> 12 agents working. 0 humans reviewing. 3 flat whites ordered.\fBetter not touch it, bro. Nobody here knows how it works either!",
+  CeladonMansion3FGameProgramPCText: "It's a Claude terminal, running the game's code!\f> 12 agents working. 0 humans reviewing. 3 long blacks ordered.\fBetter not touch it, bro. Nobody here knows how it works either!",
   CeladonMansion3FPlayingGamePCText: "Someone's raiding in WORLD OF CLAUDECRAFT instead of working!\fThe spawnd.dev dashboard says his agents finished the sprint hours ago.",
   CeladonMansion3FGameScriptPCText: "It's an agent dashboard! 'Writing game script... 97% done.'\fBetter not peek at the ending! Even the writer hasn't read it yet!",
-  CeladonMansion3FDevRoomSignText: "LEVY ST. Vibe Coding Room\fShoes optional. Flat whites essential. Surf's up at 3.",
+  CeladonMansion3FDevRoomSignText: "LEVY ST. Vibe Coding Room\fShoes optional. Long blacks essential. Surf's up at 3.",
 });
 
 // text/CeladonMansionRoof.asm

@@ -68,6 +68,11 @@
   const q = new URLSearchParams(location.search);
   const source = q.get('ref') || q.get('utm_source') || (document.referrer ? (() => { try { return new URL(document.referrer).hostname; } catch (e) { return ''; } })() : '') || 'direct';
   const endpoint = (document.querySelector('meta[name="subscribe-endpoint"]') || {}).content || 'api/subscribe';
+  // the Levy Street newsletter (Notifuse, public list): used directly when the page is hosted without tools/serve.py
+  const NEWSLETTER = { url: 'https://notifuse.mogged.email/subscribe', workspace_id: 'levystreet', list_ids: ['levystreetainewsletter'] };
+  const direct = email => fetch(NEWSLETTER.url, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ workspace_id: NEWSLETTER.workspace_id, list_ids: NEWSLETTER.list_ids, contact: { email } }) })
+    .then(r => r.json().catch(() => ({})).then(j => ({ ok: r.ok, error: j.error || (r.ok ? '' : r.status) })));
   G.visitSource = source;
 
   form.addEventListener('submit', async e => {
@@ -76,10 +81,12 @@
     if (!input.checkValidity() || !email) { input.reportValidity(); return; }
     const btn = form.querySelector('button'); btn.disabled = true; btn.textContent = '…';
     try {
-      const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source, referrer: document.referrer || '', consent: 'topbar-v1', website: form.website.value }) });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok) throw new Error(j.error || r.status);
+      let r = null, j = {};
+      try { r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source, referrer: document.referrer || '', consent: 'topbar-v1', website: form.website.value }) }); j = await r.json().catch(() => ({})); } catch (e) { r = null; }
+      if (!r || r.status === 404 || r.status === 405 || r.status === 501) { if (form.website.value) j = { ok: true }; else { const d = await direct(email); j = { ok: d.ok, error: /invalid/i.test(d.error) ? 'invalid email' : d.error }; } } // no site server here
+      else if (!r.ok || !j.ok) throw new Error(j.error || r.status);
+      if (!j.ok) throw new Error(j.error || 'failed');
       set(SUB_KEY, '1'); input.blur(); done("You're on the list ✓");
       setTimeout(() => bar.classList.remove('open'), 1800);
     } catch (err) {

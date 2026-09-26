@@ -182,11 +182,15 @@ drivers are built on top of it:
 ### Hosting
 
 `node tools/build_dist.js https://your.site/` writes a static `dist/` (plus a `preview.png` for link previews) that any
-web host can serve.
+web host can serve. Set `CF_BEACON_TOKEN=<site token>` to include Cloudflare Web Analytics, which is cookieless.
 
 `tools/serve.py` adds the small site API: email sign-ups, accounts, cloud saves and the hit counter. It stores
 everything in one SQLite file under `data/`. Passwords are stored only as salted scrypt hashes, and session tokens only
-as SHA-256 hashes. `python3 tools/serve.py export` prints the email list as CSV.
+as SHA-256 hashes.
+
+Newsletter sign-ups are kept locally, then forwarded to the Levy Street list. If the page is hosted without the
+server, it signs up with the list directly. `python3 tools/serve.py export` prints the email list as CSV, and
+`python3 tools/serve.py sync-newsletter` retries any sign-up the list hasn't accepted yet.
 
 ## Credits
 

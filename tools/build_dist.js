@@ -1,6 +1,6 @@
 // Bundle the playable game into dist/ for static hosting (Cloudflare Pages, GitHub Pages, any web server):
 // index.html + src/ only, plus preview.png (the title screen at 4x) for link previews on Reddit/Discord/etc.
-// usage: node tools/build_dist.js [https://your.site/]   (the URL makes og:image absolute, which some scrapers need)
+// usage: [CF_BEACON_TOKEN=<token>] node tools/build_dist.js [https://your.site/]   (the URL makes og:image absolute, which some scrapers need)
 'use strict';
 const fs = require('fs'), path = require('path');
 const H = require('./headless.js');
@@ -8,7 +8,15 @@ const ROOT = path.join(__dirname, '..'), OUT = path.join(ROOT, 'dist');
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT);
 const site = process.argv[2] ? process.argv[2].replace(/\/?$/, '/') : '';
-fs.writeFileSync(path.join(OUT, 'index.html'), fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace('content="preview.png"', 'content="' + site + 'preview.png"'));
+let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace('content="preview.png"', 'content="' + site + 'preview.png"');
+// Cloudflare Web Analytics (cookieless): CF_BEACON_TOKEN=<site token> adds the beacon script. Not needed when the
+// site is proxied by Cloudflare with automatic Web Analytics switched on for the zone (the edge injects it then).
+const beacon = process.env.CF_BEACON_TOKEN;
+if (beacon) {
+  if (!/^[0-9a-f]{32}$/i.test(beacon)) { console.error('CF_BEACON_TOKEN should be the 32-character site token'); process.exit(1); }
+  html = html.replace('</head>', `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${beacon}"}'></script>\n</head>`);
+}
+fs.writeFileSync(path.join(OUT, 'index.html'), html);
 fs.cpSync(path.join(ROOT, 'src'), path.join(OUT, 'src'), { recursive: true });
 // link preview: the title screen after its intro settles
 const G = H.loadGame({ search: '' }).G; G.boot();
