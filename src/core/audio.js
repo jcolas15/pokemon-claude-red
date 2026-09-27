@@ -46,8 +46,22 @@
       if (pendingTrack && !seq) startSong(pendingTrack);
     };
     for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown', 'mousedown']) document.addEventListener(ev, unlock, true);
-    // coming back to the tab (or the app, for in-app browsers) can leave the context suspended or "interrupted"
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') try { const pr = ctx.resume(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} });
+    // Hidden tab or backgrounded app: pause all sound, just like the game loop pauses. Notes are queued a moment ahead
+    // by a timer the browser throttles in the background, and iOS keeps "playback" audio alive there, so letting the
+    // context run on came out as stuttering music. Coming back resumes it (or the next tap does, if iOS insists).
+    const quiet = p => { if (p && p.catch) p.catch(() => {}); };
+    const sleep = () => {
+      if (ctx && ctx.state === 'running') try { quiet(ctx.suspend()); } catch (e) {}
+      if (keepAlive) try { keepAlive.pause(); } catch (e) {}
+    };
+    const wake = () => {
+      if (document.hidden) return;
+      if (ctx && ctx.state !== 'running') try { quiet(ctx.resume()); } catch (e) {}
+      if (keepAlive) try { quiet(keepAlive.play()); } catch (e) {}
+    };
+    document.addEventListener('visibilitychange', () => (document.hidden ? sleep() : wake()));
+    window.addEventListener('pagehide', sleep); window.addEventListener('pageshow', wake);
+    document.addEventListener('freeze', sleep); document.addEventListener('resume', wake);
   }
   const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
 

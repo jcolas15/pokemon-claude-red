@@ -16,6 +16,12 @@ if (beacon) {
   if (!/^[0-9a-f]{32}$/i.test(beacon)) { console.error('CF_BEACON_TOKEN should be the 32-character site token'); process.exit(1); }
   html = html.replace('</head>', `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${beacon}"}'></script>\n</head>`);
 }
+// every script link carries a hash of its contents, so caches (Cloudflare keeps .js for hours) can never serve an
+// old file after a deploy, while unchanged files stay cached
+html = html.replace(/<script src="(src\/[^"?]+\.js)"><\/script>/g, (m, f) => {
+  const h = require('crypto').createHash('sha1').update(fs.readFileSync(path.join(ROOT, f))).digest('hex').slice(0, 10);
+  return `<script src="${f}?v=${h}"></script>`;
+});
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
 fs.cpSync(path.join(ROOT, 'src'), path.join(OUT, 'src'), { recursive: true });
 // link preview: the title screen after its intro settles

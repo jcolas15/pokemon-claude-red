@@ -102,6 +102,13 @@ def allow(key, n, window):
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **k): super().__init__(*a, directory=WEB, **k)
 
+    def end_headers(self):
+        # the page itself always revalidates: its script links carry ?v=<content hash> (tools/build_dist.js), so a
+        # fresh page is all it takes for every visitor to pick up a deploy
+        p = self.path.split('?')[0]
+        if self.command in ('GET', 'HEAD') and (p.endswith('/') or p.endswith('.html')): self.send_header('Cache-Control', 'no-cache')
+        super().end_headers()
+
     def reply(self, code, obj):
         body = json.dumps(obj).encode()
         self.send_response(code); self.send_header('Content-Type', 'application/json'); self.send_header('Cache-Control', 'no-store')
