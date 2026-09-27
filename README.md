@@ -18,6 +18,8 @@
   <img src="https://img.shields.io/badge/phones-Game_Boy_controls-8a83a8?style=flat-square" alt="Phone controls">
 </p>
 
+<p align="center"><a href="https://claudered.dev"><b>▶ Play it now at claudered.dev</b></a></p>
+
 ---
 
 ## The prompt
@@ -61,7 +63,9 @@ Everything in this repository grew from that sentence, followed by a few days of
 
 ## Play
 
-No install and no build step. Clone the repo and open `index.html` in a browser.
+Play it in your browser at **[claudered.dev](https://claudered.dev)**, on a computer or a phone.
+
+To run it yourself, there's no install and no build step. Clone the repo and open `index.html` in a browser.
 
 ```sh
 git clone https://github.com/levy-street/pokemon-claude-red.git
