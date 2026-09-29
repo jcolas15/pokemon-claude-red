@@ -39,6 +39,6 @@
     }
   };
   if (!window.HEADLESS) {
-    window.addEventListener('load', () => { G.boot(); G.engine.startBrowser(document.getElementById('screen')); });
+    window.addEventListener('load', async () => { if (G.authGate) await G.authGate(); G.boot(); G.engine.startBrowser(document.getElementById('screen')); }); // Google sign-in first (src/game/cloudsave.js)
   }
 })(window.G);

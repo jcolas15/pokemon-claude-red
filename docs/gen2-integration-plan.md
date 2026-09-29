@@ -1,0 +1,291 @@
+# Gen 2 Pokémon in Claude Red — implementation plan
+
+Builds on [gen2-integration-research.md](gen2-integration-research.md). Adds the 100 Johto Pokémon (#152–251) to
+Kanto under **Gen 1 rules**, plus a second, post-game Elite Four made of the Gen 2 Elite Four.
+
+## Decisions (confirmed)
+
+| Topic | Decision |
+|---|---|
+| Rules | Gen 1 battle rules: one Special stat, Gen 1 formulas, no held items, no happiness, no weather, no breeding |
+| Types | Add **Dark** and **Steel** with their Gen 2 matchups. Every other matchup keeps the Gen 1 chart and quirks. Gen 1 Pokémon keep their Gen 1 types |
+| Trade / happiness evolutions | **Use an item** (Metal Coat, King's Rock, Dragon Scale, Up-Grade, Sun Stone). Happiness evolutions become **level-ups**. Espeon/Umbreon come from **Sun Stone / Moon Stone** on Eevee |
+| Baby Pokémon | **Gifts** (no eggs) |
+| Legendary beasts | **Roaming** (Raikou, Entei, Suicune) |
+| Pokédex | **One 251-entry dex** |
+| Elite Four 2 | **Post-game rematch:** after the first Hall of Fame, Indigo Plateau runs Will → Koga → Bruno → Karen → Champion Lance with Gen 2 teams |
+
+## Assumptions to confirm or change
+
+These follow from "Gen 1 rules". Each can be changed cheaply before its phase starts.
+
+1. **Special stat for Gen 2 Pokémon:** `spc = round((SpA + SpD) / 2)`, with hand overrides for outliers where the
+   average breaks the Pokémon's role (e.g. Blissey, Shuckle, Suicune). The override list is reviewed in Phase 2.
+2. **Moves:** the Gen 1 move set, **plus ~15 Gen 2 attacking moves that only use effect handlers the engine already
+   has.** Otherwise Dark and Steel have no moves at all (Bite is Normal in Gen 1). Candidates, all mapped onto
+   existing Gen 1 effects (Gen 1 has no "raise your own stat" side effect, so Gen 2's self-boosting attacks become
+   plain damage):
+   - Crunch (Dark, `SPECIAL_DOWN_SIDE`)
+   - Faint Attack (Dark, `SWIFT`: never misses)
+   - Pursuit (Dark, `NO_ADDITIONAL`)
+   - Steel Wing (Steel, `NO_ADDITIONAL`)
+   - Metal Claw (Steel, `NO_ADDITIONAL`)
+   - Iron Tail (Steel, `DEFENSE_DOWN_SIDE`)
+   - Megahorn (Bug, `NO_ADDITIONAL`)
+   - Cross Chop (Fighting, `NO_ADDITIONAL` + added to `HIGH_CRIT` in `battle.js`)
+   - Sacred Fire (Fire, `BURN_SIDE2`)
+   - Aeroblast (Flying, `NO_ADDITIONAL` + `HIGH_CRIT`)
+   - Zap Cannon (Electric, `PARALYZE_SIDE2`)
+   - Sludge Bomb (Poison, `POISON_SIDE2`)
+   - Shadow Ball (Ghost, `SPECIAL_DOWN_SIDE`)
+   - Giga Drain (Grass, `DRAIN_HP`)
+   - Twister (Dragon, `FLINCH_SIDE1`)
+
+   All of these effect names exist in `G.DATA.moves` today.
+
+   All other Gen 2 moves are remapped in learnsets to the nearest Gen 1 move, or dropped.
+3. **Elite Four 2 levels:** the Gen 2 Elite Four teams, levels raised about +20 (to roughly Lv 60–70) so the rematch is
+   harder than Red's Elite Four (Lv 53–65).
+4. **Roamers** start after the first Hall of Fame, at Lv 50. Lugia and Ho-Oh are static encounters at Lv 60 and Celebi at Lv 50,
+   all post-game.
+5. **Diploma** (Celadon Mansion game designer): all 251 except Mew and Celebi.
+6. **Time of day:** the game already has day/night. Night-only wild Pokémon (Hoothoot, Spinarak) use it as an
+   optional per-map variant.
+
+## Architecture: overlay, don't regenerate
+
+`src/data/pokedata.js` is generated from pokered and should stay regenerable. All Gen 2 content goes into new files
+that merge into `G.DATA` at load time:
+
+| New file | Contents | Produced by |
+|---|---|---|
+| `tools/convert_gen2.js` | Reads a local pokecrystal checkout and emits `src/data/gen2.js` | new tool, modelled on `tools/convert_data.js` |
+| `src/data/gen2_core.js` | **Done (Phase 1).** Dark/Steel type chart rows, the 15 added moves, the 5 evolution items, Sun Stone in the Celadon mart | hand-written (small and hand-tuned, so not generated) |
+| `src/data/gen2.js` | 100 species (Gen 1-shaped: `hp/atk/def/spd/spc`), `dexOrder` 152–251 | generated |
+| `src/data/gen2_rules.js` | Hand-tuned: Special overrides, the move remap table, evolution rewrites (items/levels) | hand-written |
+| `src/data/gen2_world.js` | Wild-slot overrides per map, trainer-party overrides, NPC gifts/trades, roamer and legendary config, Elite Four 2 parties | hand-written |
+| `src/data/mons/152-181.js` … `242-251.js` | Sprite definitions | hand-written |
+| `src/data/text/dex_gen2.js` | 100 paraphrased Pokédex entries | hand-written |
+
+All of these are added to `index.html` after `pokedata.js` and before `src/game/*`. `tools/headless.js` picks them up
+automatically, so the fuzzers cover them.
+
+## Phase 1: engine (Gen 1 rules plus the few additions) — done
+
+Landed in `src/data/gen2_core.js` and `src/game/roamers.js`, with small hooks in `battle.js`, `battleflow.js`, `bag.js`,
+`pokemon.js`, `overworld.js`, `townmap.js`, `battlescene.js` and `vfx.js`. Verified: all 225 Gen 1 type pairs unchanged, all 64
+Dark/Steel pairs match pokecrystal, the 15 moves in 80 new-moves-only battles, item and stat evolutions, and roaming
+(movement over all 23 grass routes, 1-in-4 takeover, flee, HP carry-over, sleep pinning, save/load, Town Map).
+The regression fuzzers match the original build.
+
+1. **Types.** Add `DARK` and `STEEL` to the type chart, using only the Gen 2 rows that involve Dark or Steel. Check against
+   `data/types/type_matchups.asm`:
+   - **Dark attacking:** 2x Psychic and Ghost; 0.5x Fighting, Dark and Steel.
+   - **Attacks on Dark:** Psychic does 0x; Fighting and Bug do 2x; Ghost and Dark do 0.5x.
+   - **Steel attacking:** 2x Ice and Rock; 0.5x Fire, Water, Electric and Steel.
+   - **Attacks on Steel:** 0.5x from Normal, Grass, Ice, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark and Steel;
+     0x from Poison; 2x from Fire, Fighting and Ground.
+
+   Then: add DARK to the special types in `battle.js:390-397` (STEEL counts as physical), add type labels and
+   colors wherever types are drawn (battle UI, Pokédex, summary), and add both to `TYPE_NAME`.
+2. **Evolution types:** extend `species.evos`.
+   - `{type:'item'}` already exists and covers Metal Coat, King's Rock, Dragon Scale, Up-Grade and Sun Stone once the
+     items exist. Moon Stone on Eevee gives Umbreon; Sun Stone on Eevee gives Espeon.
+   - Branching item evolutions (Gloom: Leaf Stone → Vileplume, Sun Stone → Bellossom; Poliwhirl: Water Stone → Poliwrath,
+     King's Rock → Politoed; Slowpoke: Lv 37 → Slowbro, King's Rock → Slowking) need `bag.js:99-105` to pick the evolution
+     by item, not the first match.
+   - **New:** `{type:'stat', level:20}` for Tyrogue (Attack > Defense → Hitmonlee, Attack < Defense → Hitmonchan,
+     equal → Hitmontop). This uses the existing `atk`/`def` stats.
+3. **Items:** Metal Coat, King's Rock, Dragon Scale, Up-Grade and Sun Stone as evolution items, with descriptions in
+   `bag.js:57`. Sell Sun Stone at the Celadon Dept. Store next to the other stones. Place the other four as field items
+   or gifts (Phase 4).
+4. **Added moves:** the ~15 moves from assumption 2, each pointing at an existing effect handler, with animations mapped
+   to the nearest existing VFX in `src/art/vfx.js`.
+5. **Roaming system** (new, `src/game/roamers.js`):
+   - **Storage:** state in `G.state.roamers[]` as `{species, level, hp, status, map}`.
+   - **Movement:** on every map change, each roamer moves to a random route next to its current one. Movement is
+     limited to outdoor routes that have grass.
+   - **Encounters:** when a wild encounter triggers on the roamer's map, there's a fixed chance (Gen 2 used about 1/4)
+     that the roamer appears instead. It flees on its first turn, like in Gen 2. Its HP and status carry over between
+     meetings, so sleep and paralysis work for catching it.
+   - **Tracking:** once a roamer has been seen, the Town Map (`src/game/townmap.js`) shows where it is.
+   - **Catching:** a Master Ball always works. Gen 1 has no Mean Look, so that's intended.
+   - **Hooks:** the wild-encounter hook in `battleflow.js:279` and the existing map-change hook.
+6. **Verify:** unit checks on `G.typeMult` for every Dark/Steel pair, evolution by item and stat, and a roamer
+   movement and encounter simulation in headless mode. Then `node tools/fuzzbattle.js` with Gen 1 species (no regressions).
+
+## Phase 2: data
+
+1. **`tools/convert_gen2.js`**, reading from a local pokecrystal checkout:
+   - `data/pokemon/base_stats/*.asm`: base stats, types, catch rate, base exp and growth rate. Special comes from
+     assumption 1 plus the overrides.
+   - `data/pokemon/evos_attacks.asm`: learnsets and evolutions, rewritten by `gen2_rules.js` (happiness evolutions
+     become levels; trade evolutions become items).
+   - **TM/HM compatibility:** a Gen 2 TM counts only when its move has the same name as a Gen 1 TM (Thunderbolt, Ice
+     Beam, Earthquake, Psychic, Rest, …).
+   - `data/pokemon/dex_entries/*`: category, height and weight.
+   - The ~15 added moves come from `data/moves/moves.asm`.
+2. **Learnset rewrite:** Gen 2-only moves go through the remap table (e.g. Sweet Scent → dropped, Mud-Slap → Sand Attack,
+   Fury Cutter → Slash). Every species must end up with a damaging move by Lv 5–10. A lint step in the converter
+   flags species that don't.
+3. **Happiness evolutions become levels** (tuned in `gen2_rules.js`):
+   - **Babies:** Pichu, Cleffa, Igglybuff, Togepi around Lv 15.
+   - **Crobat:** Golbat at around Lv 40.
+   - **Blissey:** Chansey via level, around Lv 45, or via an item; to be decided when tuning.
+   - **Smoochum, Elekid, Magby:** Lv 30, as in Gen 2.
+4. **Pokédex text:** 100 paraphrased entries in `dex_gen2.js`, in the same style as `src/data/text/dex.js`.
+5. **Verify:** the converter's lint passes, every species has a valid learnset, evolutions and dex data, and
+   `fuzzbattle.js` runs with Gen 2 species added to its pool.
+
+## Phase 3: art (the long pole; runs in parallel from Phase 1 on)
+
+- 100 sprite definitions in the `src/art/pokesprite.js` primitive format, in four batch files. Back views are generated
+  automatically.
+- A Pokémon without a definition already renders a fallback sprite and plays a cry, so Phases 4–5 don't wait on art.
+- Review each batch with `node tools/monsheet.js` (renders sheets to PNG).
+- **Suggested order:** the Pokémon players meet earliest first (route Pokémon, gifts), then trainer aces, then evolution-only
+  and legendary Pokémon.
+- **Also:** overworld cast entries and battle portraits for **Will** and **Karen** (`src/data/cast.js`,
+  `src/art/trainerpics.js`). Koga, Bruno and Lance already exist.
+
+## Phase 4: world integration
+
+### Wild encounters (`gen2_world.js`, overrides of `G.DATA.wild` / `goodRod` / `superRod`)
+- Keep every map's rate and **Red's level slots**. Swap roughly 2–4 of the 10 grass slots per route for Gen 2 Pokémon of
+  similar caliber: the same evolution stage and a stat total within about ±15% of the Gen 1 Pokémon it replaces.
+- Game Freak's Kanto tables in pokecrystal (`data/wild/kanto_grass.asm`, `kanto_water.asm`) are the reference for which Pokémon
+  fit which route.
+- **Early routes (1–3, 22, 24–25, Viridian Forest):** Sentret, Hoothoot (night), Ledyba, Spinarak (night), Hoppip, Natu.
+- **Mid-game:** Marill, Mareep, Wooper, Aipom, Yanma, Snubbull, Teddiursa, Slugma, Swinub, Phanpy, Dunsparce, Gligar.
+- **Water / rods:** Chinchou, Remoraid, Qwilfish, Corsola, Mantine.
+- **Safari Zone / late areas:** Heracross, Girafarig, Stantler, Misdreavus, Murkrow, Sneasel, Houndour, Skarmory,
+  Delibird, Smeargle.
+- **Cerulean Cave:** Larvitar (rare).
+- **Never wild:** evolution-only Pokémon (Crobat, Steelix, Scizor, Kingdra, Politoed, Slowking, Porygon2,
+  Espeon, Umbreon, Blissey, Bellossom, final starter forms, Tyranitar).
+- **Coverage:** every one of the 100 is obtainable. The coverage check in the verify step enforces this.
+
+### Gifts and trades (babies and starters; confirm the NPCs)
+| Pokémon | Proposed source |
+|---|---|
+| Chikorita / Cyndaquil / Totodile | Bill's house (Cerulean), one of three after you help Bill |
+| Togepi | Day Care man, one time |
+| Tyrogue | Fighting Dojo, after the Hitmonlee/Hitmonchan gift |
+| Pichu | Pokémon Fan Club (Vermilion) |
+| Cleffa | Mt. Moon Pokémon Center |
+| Igglybuff | Route 4 Pokémon Center |
+| Smoochum, Elekid, Magby | In-game NPC trades (new entries in `G.DATA.trades`, via `story.js:332`), e.g. Cinnabar Lab and Cerulean |
+| Metal Coat, King's Rock, Dragon Scale, Up-Grade | Field items or NPC gifts (Up-Grade at Silph Co., Dragon Scale at Seafoam, Metal Coat at the Power Plant, King's Rock at the S.S. Anne) |
+
+### Trainers (`gen2_world.js` overrides of `G.DATA.parties`, keyed `[cls][n]`)
+- **Gym leaders:** one or two type-matching Gen 2 Pokémon, at the leader's level band. An evolved Gen 2 ace appears only
+  from the 5th gym on.
+  - Brock: Sudowoodo
+  - Misty: Marill
+  - Lt. Surge: Flaaffy
+  - Erika: Jumpluff
+  - Koga: Ariados
+  - Sabrina: Xatu
+  - Blaine: Magcargo
+  - Giovanni: Gligar
+
+  The per-leader choices are tuned during playtesting.
+- **Elite Four 1 and the Champion:** unchanged from Red, so the classic run stays classic.
+- **Route trainers:** swap by class theme on roughly a third of teams, levels unchanged.
+  - Bug Catcher: Ledyba, Spinarak
+  - Swimmer: Chinchou, Remoraid
+  - Hiker: Sudowoodo, Phanpy
+  - Psychic: Natu, Girafarig
+  - Bird Keeper: Hoothoot, Murkrow
+  - Rocket: Houndour, Murkrow, Sneasel
+- **Rival:** one Gen 2 Pokémon added from the Silph Co. fight onward.
+
+### Legendaries (post-game, via the existing `staticMon()` in `src/scripts/late.js:90`)
+| Pokémon | Location | Lv |
+|---|---|---|
+| Raikou, Entei, Suicune | Roaming Kanto routes after the first Hall of Fame | 50 |
+| Lugia | Seafoam Islands, deepest floor (new object away from Articuno) | 60 |
+| Ho-Oh | Pokémon Tower, top floor, after the first Hall of Fame | 60 |
+| Celebi | Viridian Forest shrine (new object), after the first Hall of Fame | 50 |
+
+They use the existing `legendary` music.
+
+### Verify
+- A coverage script checks that all 100 are obtainable (wild, gift, trade, evolution or static).
+- `node tools/talkfuzz.js`, `node -r ./tools/pathaudit.js tools/stepfuzz.js` and `node tools/warpcheck.js` all pass. The
+  Silph Co. 11F warp warning already exists in the original code.
+
+## Phase 5: Elite Four 2
+
+**Flow:**
+- Your first Hall of Fame plays exactly as in Red.
+- On later visits, Indigo Plateau runs Elite Four 2 instead of Elite Four 1. Red's first Hall of Fame already resets
+  the Elite Four flags.
+- Elite Four 2 reuses the four rooms and the Champion's room: Lorelei's room holds **Will**, Bruno's room holds
+  **Koga**, Agatha's room holds **Bruno**, Lance's room holds **Karen**, and the Champion's room holds **Lance**.
+- Beating Lance adds a second Hall of Fame entry and plays the credits again.
+
+**Build:**
+1. A run flag in `G.state` (`e4Run: 1 | 2`), set after the first Hall of Fame.
+2. The room table in `late.js:836-838` (and the Lance/Champion scripts at `late.js:885-952`) picks, per run, which
+   trainer and sprite each room shows, its text, and its battle flags. Run 2 uses its own `EVENT_BEAT_E4_2_*` flags so both
+   runs can be tracked.
+3. **Classes:** new `WILL` and `KAREN` trainer classes. Koga, Bruno and Lance get their Elite Four 2 teams as a
+   second party, `n = 2`. Add Will and Karen to `LEADERS` and `TRAINER_ITEMS` in `battleflow.js:243-246`. Champion Lance
+   gets the final-battle music, like Blue does in run 1.
+4. **Teams:** the Gen 2 Elite Four rosters, levels about +20 (assumption 3). Verify against pokecrystal
+   `data/trainers/parties.asm`:
+
+   | Trainer | Gen 2 roster |
+   |---|---|
+   | Will (Psychic) | Xatu, Jynx, Exeggutor, Slowbro, Xatu |
+   | Koga (Poison) | Ariados, Venomoth, Forretress, Muk, Crobat |
+   | Bruno (Fighting) | Hitmontop, Hitmonlee, Hitmonchan, Onix, Machamp |
+   | Karen (Dark) | Umbreon, Vileplume, Gengar, Murkrow, Houndoom |
+   | Champion Lance (Dragon) | Gyarados, Dragonite, Dragonite, Aerodactyl, Charizard, Dragonite |
+
+5. **Dialogue:** intro, defeat and after-battle lines for all five, paraphrased like the rest of the game's text.
+6. **Verify:** a headless script plays through Elite Four 2 (flags, room order, parties, Hall of Fame 2 entry), and
+   `talkfuzz.js` covers the new text.
+
+## Phase 6: Pokédex and meta (251)
+
+| Where | Change |
+|---|---|
+| `menus.js:154,166` | Replace the literal `151` with `D.dexOrder.length - 1` |
+| `pc.js:149-155` | Extend Oak's rating tiers past 151 |
+| `mid.js:617` | Diploma at all 251 except Mew and Celebi (assumption 5) |
+| `share.js:19,51,345` | Milestones `…, 150, 151, 175, 200, 225, 250, 251`; "Pokédex complete" at 251; validation caps at 251 |
+| `wtp.js:11` | The quiz draws from all 251 |
+| `social.js:299` | Add Raikou, Entei, Suicune, Lugia, Ho-Oh and Celebi to `LEGENDS` |
+| `glitches.js` | **No change.** Gen 2 stays out of the Gen 1 internal index, so MissingNo. and the Mew trick are untouched |
+| Saves | No format change. New fields (`roamers`, `e4Run`) get defaults, and old saves load as they are |
+| Title / credits | Optional: add some Gen 2 Pokémon to `TITLE_MONS` / `CREDITS_MONS` |
+
+**Verify:** the Pokédex scrolls to #251, share cards render with new counts, and an old save imports and loads.
+
+## Phase 7: balance and playtest
+
+- A full playthrough on a fresh save, checking that no Gen 2 Pokémon trivializes an early gym.
+- Watch Steel's many resistances in Gen 1 metagame terms (Skarmory, Steelix, Forretress).
+- Watch Dark's immunity to Psychic, a big shift in a Psychic-dominated Gen 1.
+- Run all fuzzers: `fuzzbattle`, `talkfuzz`, `stepfuzz`, `warpcheck`.
+
+## Order and dependencies
+
+```
+Phase 1 engine ──► Phase 2 data ──► Phase 4 world ──► Phase 5 Elite Four 2 ──► Phase 7 balance
+      │                                   ▲                    ▲
+      └──► Phase 3 art (parallel; placeholders until done) ─────┘
+Phase 6 Pokédex/meta can land any time after Phase 2
+```
+
+**Rough share of effort:** art ~50%, engine ~15% (roaming is the largest new piece), data ~10%, world ~15%, Elite Four 2
+~5%, meta and balance ~5%.
+
+## Out of scope
+
+- Johto maps.
+- The Gen 2 systems themselves: breeding/eggs, held items in battle, happiness, weather, the Special split, the full Gen 2 move list, shinies, the day-of-week events, Pokégear, Apricorn balls.
+- Janine replacing Koga at the Fuchsia Gym.
+- New music (the Gen 2 legendary and roamer themes).

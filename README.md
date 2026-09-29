@@ -73,12 +73,11 @@ cd pokemon-claude-red
 open index.html            # or double-click it
 ```
 
-To run the full site (email sign-up, accounts with cloud saves, the hit counter), serve it with the bundled
-server. It needs only Python 3:
+With `src/config.js` left empty, the game saves to the browser only, with no sign-in. Filling it in turns on Google
+sign-in and cloud saves (see [Hosting](#hosting)); the page then has to be served over http rather than opened as a file:
 
 ```sh
-node tools/build_dist.js      # bundles index.html + src/ into dist/
-python3 tools/serve.py        # http://localhost:8784
+python3 -m http.server 8784   # http://localhost:8784
 ```
 
 ### Controls
@@ -92,7 +91,7 @@ python3 tools/serve.py        # http://localhost:8784
 | SELECT | Shift or C | SELECT | Select |
 
 On a computer, the mouse also works: click to walk or pick menu entries, right-click for B or the START menu, and scroll lists with the wheel.
-Progress saves to the browser. An optional free account keeps a copy on the server, so the game survives in-app browsers that wipe storage and can move between devices.
+Progress saves to the browser. With Supabase set up, every SAVE also keeps a copy in the cloud for the signed-in player, so the game survives in-app browsers that wipe storage and can move between devices.
 
 ## What's in it
 
@@ -146,7 +145,7 @@ Lv 132 Mewtwo. Meeting MissingNo. adds 128 to the sixth item in your bag.
 ## How it's built
 
 ```
-index.html          the page: canvas, phone controller, account box, script list
+index.html          the page: canvas, phone controller, sign-in gate, script list
 src/core/           framebuffer + drawing primitives, pixel font, input, main loop, audio synth + GB sequencer
 src/art/            procedural renderers: terrain, buildings, interiors, characters, Pokémon, battle scenes, VFX
 src/data/           maps, species, moves, trainers, music (converted from pokered), dialogue, Pokémon shape files
@@ -188,13 +187,24 @@ drivers are built on top of it:
 `node tools/build_dist.js https://your.site/` writes a static `dist/` (plus a `preview.png` for link previews) that any
 web host can serve. Set `CF_BEACON_TOKEN=<site token>` to include Cloudflare Web Analytics, which is cookieless.
 
-`tools/serve.py` adds the small site API: email sign-ups, accounts, cloud saves and the hit counter. It stores
-everything in one SQLite file under `data/`. Passwords are stored only as salted scrypt hashes, and session tokens only
-as SHA-256 hashes.
+#### Sign-in and cloud saves (Supabase)
 
-Newsletter sign-ups are kept locally, then forwarded to the Levy Street list. If the page is hosted without the
-server, it signs up with the list directly. `python3 tools/serve.py export` prints the email list as CSV, and
-`python3 tools/serve.py sync-newsletter` retries any sign-up the list hasn't accepted yet.
+Players sign in with Google. Anyone can sign in, but only players you approve get past the sign-in screen, and
+row-level security keeps each save readable and writable by its owner only. A save is 1-60 KB of JSON, one row per player.
+
+1. In the Supabase SQL editor, run `supabase/schema.sql`. The owner email in it is approved automatically; change it
+   there if you play with a different Google account.
+2. In Google Cloud Console, create an OAuth client (type *Web application*) with the authorized redirect URI
+   `https://<project-ref>.supabase.co/auth/v1/callback`. Paste its client ID and secret into Supabase under
+   Authentication > Sign In / Providers > Google.
+3. In Supabase under Authentication > URL Configuration, set the Site URL to your Vercel URL and add it (plus
+   `http://localhost:8784/` for local testing) to the redirect URLs.
+4. Put the project URL and anon key (Project Settings > API) in `src/config.js`.
+5. To let someone in, open Table Editor > `players` and set their `approved` to `true`. Until then they see
+   "Waiting for the owner to approve you".
+
+On Vercel, import the repo with framework preset *Other*, no build command and the repo root as the output directory.
+You can also deploy the `dist/` folder that `node tools/build_dist.js` writes.
 
 ## Credits
 
@@ -210,5 +220,4 @@ affiliated with or endorsed by Nintendo, The Pokémon Company, GAME FREAK, Creat
 
 ## Levy Street
 
-Levy Street works at the frontier of **AI × gaming × consumer**. Sign up for updates from the bar at the top of the
-game, or say hello at [hello@levystreet.com](mailto:hello@levystreet.com).
+Levy Street works at the frontier of **AI × gaming × consumer**. Say hello at [hello@levystreet.com](mailto:hello@levystreet.com).

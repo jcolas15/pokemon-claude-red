@@ -8,6 +8,7 @@
   const TYPE_COL = {
     NORMAL: '#a8a878', FIRE: '#f08030', WATER: '#6890f0', GRASS: '#78c850', ELECTRIC: '#f8d030', ICE: '#98d8d8', FIGHTING: '#c03028',
     POISON: '#a040a0', GROUND: '#e0c068', FLYING: '#a890f0', PSYCHIC_TYPE: '#f85888', BUG: '#a8b820', ROCK: '#b8a038', GHOST: '#705898', DRAGON: '#7038f8',
+    DARK: '#705848', STEEL: '#b8b8d0',
   };
   G.TYPE_COL = TYPE_COL;
   G.typeName = t => t === 'PSYCHIC_TYPE' ? 'PSYCHIC' : t;

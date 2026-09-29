@@ -73,7 +73,11 @@
     movesAtLevel(lv) { return this.sp.learn.filter(([l]) => l === lv).map(([, m]) => m); }
     // returns species to evolve into (level-based), or null
     evoByLevel() {
-      for (const e of this.sp.evos) if (e.type === 'level' && this.level >= e.level) return e.to;
+      for (const e of this.sp.evos) {
+        if (e.type === 'level' && this.level >= e.level) return e.to;
+        // TYROGUE: which of Attack and Defense is higher picks the evolution
+        if (e.type === 'stat' && this.level >= e.level && Math.sign(this.atk - this.def) === e.cmp) return e.to;
+      }
       return null;
     }
     evoByItem(item) { for (const e of this.sp.evos) if (e.type === 'item' && e.item === item) return e.to; return null; }

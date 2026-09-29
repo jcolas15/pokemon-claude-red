@@ -1,28 +1,20 @@
 #!/usr/bin/env python3
 # Serves the built game (dist/) plus the small site API, all stored in one SQLite file (data/claudered.db):
-#   POST /api/subscribe           email signup from the Levy St. bar (src/game/topbar.js), forwarded to the newsletter
-#   POST /api/hit, GET /api/hits  the late-90s hit counter
-#   POST /api/account/signup|login|logout, GET|PUT /api/save   accounts + cloud saves (src/game/cloudsave.js)
+#   POST /api/hit, GET /api/hits  the late-90s hit counter (unused by the page now)
+#   POST /api/account/signup|login|logout, GET|PUT /api/save   email/password accounts + cloud saves (unused by the
+#   page now that cloud saves live in Supabase: src/game/cloudsave.js)
 #
 #   python3 tools/serve.py [port] [web dir]      serve (default 8784, dist/)
-#   python3 tools/serve.py export                print the email list (bar signups + opted-in accounts) as CSV
-#   python3 tools/serve.py sync-newsletter       re-send any signup the newsletter didn't accept yet
-#
-# Newsletter: every signup is kept here first, then forwarded to the Levy Street list on Notifuse in the background
-# (NEWSLETTER_URL / NEWSLETTER_WORKSPACE / NEWSLETTER_LIST override the defaults below; its status is in `synced`).
 #
 # Passwords are never stored: only a salted scrypt hash (n=2^17, r=8, p=1, the OWASP minimum). Sessions are random
 # 256-bit tokens held by the browser; the server keeps only their SHA-256. The database sits outside the web root,
 # is git-ignored, and nothing here reads emails back over HTTP.
-import base64, csv, hashlib, hmac, http.server, json, os, re, secrets, sqlite3, sys, threading, time, urllib.error, urllib.request
+import base64, hashlib, hmac, http.server, json, os, re, secrets, sqlite3, sys, threading, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.environ.get('CLAUDERED_DB', os.path.join(ROOT, 'data', 'claudered.db'))
 EMAIL = re.compile(r'^[^@\s"<>]{1,64}@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 SESSION_DAYS, MAX_SAVE = 365, 512 * 1024
-NEWSLETTER_URL = os.environ.get('NEWSLETTER_URL', 'https://notifuse.mogged.email/subscribe')
-NEWSLETTER_WORKSPACE = os.environ.get('NEWSLETTER_WORKSPACE', 'levystreet')
-NEWSLETTER_LIST = os.environ.get('NEWSLETTER_LIST', 'levystreetainewsletter')
 now_iso = lambda: time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
 
 def connect():
@@ -31,40 +23,12 @@ def connect():
     if not os.path.exists(DB) and os.path.exists(old): os.rename(old, DB)
     db = sqlite3.connect(DB, check_same_thread=False)
     db.executescript('''
-      CREATE TABLE IF NOT EXISTS subscribers (
-        email TEXT PRIMARY KEY,   -- lower-cased
-        created_at TEXT NOT NULL, -- UTC, ISO 8601
-        source TEXT,              -- ?ref= / ?utm_source= on the link, else the referring host, else "direct"
-        referrer TEXT,
-        consent TEXT);            -- which wording they agreed to: topbar-v1 (the bar), account-v1 (the sign-up box)
       CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, pw TEXT NOT NULL, created_at TEXT NOT NULL, source TEXT);
       CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, account INTEGER NOT NULL, created_at REAL NOT NULL);
       CREATE TABLE IF NOT EXISTS saves (account INTEGER PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS counters (name TEXT PRIMARY KEY, value INTEGER NOT NULL);''')
-    if 'synced' not in [r[1] for r in db.execute('PRAGMA table_info(subscribers)')]:
-        db.execute('ALTER TABLE subscribers ADD COLUMN synced TEXT')  # newsletter status: NULL = not sent yet, 'ok', or the error
     db.commit(); return db
-
-def send_to_newsletter(email):
-    """POST one contact to the newsletter list; returns 'ok' or a short error"""
-    body = json.dumps({'workspace_id': NEWSLETTER_WORKSPACE, 'list_ids': [NEWSLETTER_LIST], 'contact': {'email': email}}).encode()
-    req = urllib.request.Request(NEWSLETTER_URL, data=body, headers={'Content-Type': 'application/json'}, method='POST')
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r: return 'ok' if 200 <= r.status < 300 else f'http {r.status}'
-    except urllib.error.HTTPError as e: return f'http {e.code}: ' + e.read(200).decode('utf-8', 'replace')
-    except Exception as e: return 'error: ' + str(e)[:200]
-
-if len(sys.argv) > 1 and sys.argv[1] == 'export':
-    w = csv.writer(sys.stdout); w.writerow(['email', 'created_at', 'source', 'referrer', 'consent', 'synced'])
-    w.writerows(connect().execute('SELECT email, created_at, source, referrer, consent, synced FROM subscribers ORDER BY created_at'))
-    sys.exit()
-if len(sys.argv) > 1 and sys.argv[1] == 'sync-newsletter':
-    db = connect(); rows = db.execute("SELECT email FROM subscribers WHERE synced IS NULL OR synced != 'ok'").fetchall()
-    for (email,) in rows:
-        status = send_to_newsletter(email); db.execute('UPDATE subscribers SET synced = ? WHERE email = ?', (status, email)); db.commit()
-        print(status.ljust(8)[:60], email)
-    print(len(rows), 'sent'); sys.exit()
 
 # ---------------------------------------------------------------- passwords + sessions
 N, R, P = 2 ** 17, 8, 1
@@ -83,13 +47,6 @@ tok_hash = lambda t: hashlib.sha256(t.encode()).hexdigest()
 WEB = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else os.path.join(ROOT, 'dist')
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8784
 db, lock, limits, recent = connect(), threading.Lock(), threading.Lock(), {}
-
-def forward(email):
-    def run():
-        status = send_to_newsletter(email)
-        with lock: db.execute('UPDATE subscribers SET synced = ? WHERE email = ?', (status, email)); db.commit()
-        if status != 'ok': print('newsletter:', status, flush=True)
-    threading.Thread(target=run, daemon=True).start()
 
 def allow(key, n, window):
     """sliding-window rate limit: True if this key has used fewer than n tries in the last `window` seconds"""
@@ -177,9 +134,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if t:
                 with lock: db.execute('DELETE FROM sessions WHERE token = ?', (tok_hash(t),)); db.commit()
             return self.reply(200, {'ok': True})
-        if path not in ('/api/subscribe', '/api/account/signup', '/api/account/login'): return self.send_error(404)
-        # 20 tries an hour per address for the bar (offices and campuses share one), 30 per 15 min for accounts
-        if not (allow(('sub', self.ip()), 20, 3600) if path == '/api/subscribe' else allow(('auth', self.ip()), 30, 900)):
+        if path not in ('/api/account/signup', '/api/account/login'): return self.send_error(404)
+        if not allow(('auth', self.ip()), 30, 900):  # 30 tries per 15 min per address
             return self.reply(429, {'ok': False, 'error': 'too many tries'})
         try: d = self.body()
         except Exception: return self.reply(400, {'ok': False, 'error': 'bad request'})
@@ -187,13 +143,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         email = str(d.get('email', '')).strip().lower()
         if len(email) > 254 or not EMAIL.match(email): return self.reply(400, {'ok': False, 'error': 'invalid email'})
         clip = lambda v: str(v or '')[:300]
-        if path == '/api/subscribe':
-            with lock:
-                db.execute('INSERT OR IGNORE INTO subscribers (email, created_at, source, referrer, consent) VALUES (?, ?, ?, ?, ?)', (email, now_iso(), clip(d.get('source')), clip(d.get('referrer')), clip(d.get('consent'))))
-                db.commit(); status = db.execute('SELECT synced FROM subscribers WHERE email = ?', (email,)).fetchone()[0]
-            if status != 'ok': forward(email)
-            return self.reply(200, {'ok': True})
-
         pw = str(d.get('password', ''))
         if path == '/api/account/signup':
             if not 8 <= len(pw) <= 200: return self.reply(400, {'ok': False, 'error': 'weak password'})
@@ -203,10 +152,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             with lock:
                 try: cur = db.execute('INSERT INTO accounts (email, pw, created_at, source) VALUES (?, ?, ?, ?)', (email, h, now_iso(), clip(d.get('source'))))
                 except sqlite3.IntegrityError: return self.reply(409, {'ok': False, 'error': 'exists'})
-                optin = d.get('updates') is True  # the opt-in box, unticked by default
-                if optin: db.execute('INSERT OR IGNORE INTO subscribers (email, created_at, source, referrer, consent) VALUES (?, ?, ?, ?, ?)', (email, now_iso(), clip(d.get('source')), clip(d.get('referrer')), 'account-v1'))
                 db.commit(); acc = cur.lastrowid
-            if optin: forward(email)
             return self.reply(200, {'ok': True, 'token': self.new_session(acc), 'email': email, 'saveAt': None})
 
         # login: 10 wrong passwords an hour per email, then it waits

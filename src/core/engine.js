@@ -87,8 +87,7 @@
     const view = new Uint32Array(img.data.buffer);
     function resize() {
       if (G.pageLayout && G.pageLayout(canvas)) return; // touch devices: the page lays out screen + controller (src/game/touchpad.js)
-      const top = G.pageBar ? G.pageBar.inset() : 0; // the Levy St. bar above the game (src/game/topbar.js)
-      const s = Math.max(1, Math.floor(Math.min(window.innerWidth / G.gfx.W, (window.innerHeight - top) / G.gfx.H)));
+      const s = Math.max(1, Math.floor(Math.min(window.innerWidth / G.gfx.W, window.innerHeight / G.gfx.H)));
       canvas.style.width = (G.gfx.W * s) + 'px'; canvas.style.height = (G.gfx.H * s) + 'px';
     }
     window.addEventListener('resize', resize); resize(); G.relayout = resize;

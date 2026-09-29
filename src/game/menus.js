@@ -47,7 +47,7 @@
           if (yield* G.ask('Would you like to SAVE the game?')) {
             G.saveGame(); G.sfx && G.sfx('save');
             yield* G.say(G.state.name + ' saved the game!');
-            if (G.cloudAfterSave) yield* G.cloudAfterSave(); // cloud copy: offers a free account, or syncs to it (src/game/cloudsave.js)
+            if (G.cloudAfterSave) yield* G.cloudAfterSave(); // cloud copy in Supabase (src/game/cloudsave.js)
           }
         }
         else if (it === 'OPTION') yield* G.optionsMenu();

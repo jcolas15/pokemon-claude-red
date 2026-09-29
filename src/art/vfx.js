@@ -362,6 +362,10 @@
     SHARPEN: ['glow', '#ffffff'], CONVERSION: ['conversion'], TRI_ATTACK: ['triattack'], SUPER_FANG: ['bite'], SLASH: ['claw', 3], SUBSTITUTE: ['glow'],
     STRUGGLE: ['hit'], CHARGE: ['charge'], DRAIN: ['drain'], LEECH_SEED_DRAIN: ['seeddrain'], HEAL_ITEM: ['healitem'], ROCK_THROW_SAFARI: ['safariRock'],
     FLY_CHARGE: ['fly_charge'], DIG_CHARGE: ['dig_charge'], BIDE_HIT: ['counter'], HORN: ['needles', 2],
+    // Gen 2 attacks (src/data/gen2_core.js) reuse the closest Gen 1 animation
+    AEROBLAST: ['wind'], FAINT_ATTACK: ['quick'], SLUDGE_BOMB: ['poison'], ZAP_CANNON: ['thunder'], GIGA_DRAIN: ['drain'], STEEL_WING: ['wing'],
+    SACRED_FIRE: ['fireblast'], MEGAHORN: ['needles', 3], PURSUIT: ['hit'], IRON_TAIL: ['bighit'], METAL_CLAW: ['claw'], CROSS_CHOP: ['cut'],
+    TWISTER: ['wind'], CRUNCH: ['bite'], SHADOW_BALL: ['nightshade'],
   };
 
   function* move(sc, id, k, hit) {

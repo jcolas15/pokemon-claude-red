@@ -89,6 +89,12 @@
         const visited = S.visited && S.visited[n];
         s.rect(x - 2, y - 2, 5, 5, P.outline); s.rect(x - 1, y - 1, 3, 3, visited ? hex('#f8f0d0') : hex('#b0a890'));
       }
+      // roaming legendaries you have met, as blinking diamonds (src/game/roamers.js)
+      if (!o.fly && G.roamers && this.t % 30 < 22) for (const r of G.roamers.seen()) {
+        const w = tm.where[r.map]; if (!w) continue;
+        const x = mx + Math.round(w.x * scale), y = my + Math.round(w.y * scale);
+        for (let d = 0; d < 3; d++) { s.hline(x - d, x + d, y - 2 + d, hex('#f8d048')); s.hline(x - d, x + d, y + 2 - d, hex('#f8d048')); }
+      }
       // player marker / fly cursor
       const target = o.fly ? o.options[sel] : cur;
       const w = tm.where[target];
@@ -106,7 +112,8 @@
       const nm = target ? G.mapDisplayName(G.maps.getMap(target)) : '';
       G.ui.text(s, nm, px + 10, 30, hex('#c04040'));
       G.ui.frame(s, px, 52, pw, 120);
-      const lines = F.wrap(o.fly ? 'Choose a town you have visited. A: fly  B: cancel' : 'KANTO region. Your location blinks in red.', pw - 20);
+      const roam = !o.fly && G.roamers && G.roamers.seen().length;
+      const lines = F.wrap(o.fly ? 'Choose a town you have visited. A: fly  B: cancel' : 'KANTO region. Your location blinks in red.' + (roam ? ' Roaming POKéMON show as gold diamonds.' : ''), pw - 20);
       lines.forEach((l, i) => G.ui.text(s, l, px + 10, 60 + i * 14));
     } };
     return yield* G.engine.run(scene);

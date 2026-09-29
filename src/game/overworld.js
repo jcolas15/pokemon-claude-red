@@ -82,6 +82,7 @@
       S.map = name; S.x = x; S.y = y; S.dir = dir || S.dir;
       if (this.map.outdoor) { S.lastOutdoor = name; S.visited = S.visited || {}; if (G.FLY_SPOTS && G.FLY_SPOTS[name]) S.visited[name] = true; }
       if (this.prevMapName !== name) { const pm = this.prevMapName && G.maps.cache[this.prevMapName]; if (pm && pm.overrides && (Object.keys(pm.overrides).length || (pm.passOverride && Object.keys(pm.passOverride).length))) { pm.overrides = {}; pm.passOverride = {}; delete MR.cache[pm.name]; } this.strength = false; this.flashed = false; }
+      if (this.prevMapName !== name && G.roamers) G.roamers.step();
       this.prevMapName = name;
       this.autoPath = null;
       if (!this.player) this.player = new Actor({ sprite: 'red', isPlayer: true });

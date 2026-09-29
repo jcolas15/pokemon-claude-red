@@ -8,6 +8,7 @@
   const HEAL = { POTION: 20, SUPER_POTION: 50, HYPER_POTION: 200, MAX_POTION: 9999, FULL_RESTORE: 9999, FRESH_WATER: 50, SODA_POP: 60, LEMONADE: 80 };
   const CURE = { ANTIDOTE: ['PSN'], BURN_HEAL: ['BRN'], ICE_HEAL: ['FRZ'], AWAKENING: ['SLP'], PARLYZ_HEAL: ['PAR'], FULL_HEAL: ['PSN', 'BRN', 'FRZ', 'SLP', 'PAR'], FULL_RESTORE: ['PSN', 'BRN', 'FRZ', 'SLP', 'PAR'] };
   const VITAMIN = { HP_UP: 'hp', PROTEIN: 'atk', IRON: 'def', CARBOS: 'spd', CALCIUM: 'spc' };
+  const EVO_ITEM = id => /STONE$/.test(id) || ['METAL_COAT', 'KINGS_ROCK', 'DRAGON_SCALE', 'UP_GRADE'].includes(id);
   const X_ITEM = { X_ATTACK: 'atk', X_DEFEND: 'def', X_SPEED: 'spd', X_SPECIAL: 'spc', X_ACCURACY: 'acc' };
   const DESC = {
     POTION: 'Restores 20 HP to one POKéMON.', SUPER_POTION: 'Restores 50 HP to one POKéMON.', HYPER_POTION: 'Restores 200 HP to one POKéMON.',
@@ -23,6 +24,8 @@
     FRESH_WATER: 'Mineral water. Restores 50 HP.', SODA_POP: 'A fizzy soda. Restores 60 HP.', LEMONADE: 'Very sweet. Restores 80 HP.',
     BICYCLE: 'A folding bike. Ride it for faster travel.', TOWN_MAP: 'A map of the KANTO region.', ITEMFINDER: 'Detects hidden items nearby.',
     OLD_ROD: 'An old fishing rod.', GOOD_ROD: 'A decent fishing rod.', SUPER_ROD: 'An excellent fishing rod.', EXP_ALL: 'Shares EXP. among all POKéMON in the party.',
+    METAL_COAT: 'A special metal coating. Makes certain POKéMON evolve.', KINGS_ROCK: 'A rock that looks like a crown. Makes certain POKéMON evolve.',
+    DRAGON_SCALE: 'A thick, tough scale. Makes certain POKéMON evolve.', UP_GRADE: 'A transparent device. Makes certain POKéMON evolve.',
     POKE_FLUTE: 'Its tune awakens sleeping POKéMON.', COIN_CASE: 'A case for holding GAME CORNER coins.', SILPH_SCOPE: 'Lets you see through ghostly disguises.',
   };
   const bag = {
@@ -99,7 +102,7 @@
       const evo = m.evoByLevel(); if (evo) yield* G.evolve(m, evo);
       return true;
     }
-    if (/STONE$/.test(id)) {
+    if (EVO_ITEM(id)) {
       const evo = m.evoByItem(id);
       if (!evo) { yield* say("It won't have any effect."); return false; }
       yield* G.evolve(m, evo, true); return true;
@@ -130,7 +133,7 @@
     return false;
   }
   G.applyItemToMon = applyToMon;
-  const needsTarget = id => HEAL[id] !== undefined || CURE[id] || /REVIVE|RARE_CANDY|STONE$|ETHER|ELIXER|PP_UP/.test(id) || VITAMIN[id] || /^(TM|HM)_/.test(id);
+  const needsTarget = id => HEAL[id] !== undefined || CURE[id] || /REVIVE|RARE_CANDY|STONE$|ETHER|ELIXER|PP_UP/.test(id) || EVO_ITEM(id) || VITAMIN[id] || /^(TM|HM)_/.test(id);
 
   // Battle item use (called by Battle.useItem). Returns 'cancel' | 'used'
   G.useItemInBattle = function* (id, target, b, ui) {
@@ -240,7 +243,7 @@
     yield* G.engine.run(new BagScreen({
       onPick: function* (id, scr) {
         if (bag.isKey(id) && id !== 'POKE_FLUTE') { yield* scr.say("That can't be used here."); return; }
-        if (/STONE$|RARE_CANDY|^TM_|^HM_|REPEL|ESCAPE_ROPE|VITAMIN/.test(id) || VITAMIN[id]) { yield* scr.say("That can't be used here."); return; }
+        if (/STONE$|RARE_CANDY|^TM_|^HM_|REPEL|ESCAPE_ROPE|VITAMIN/.test(id) || VITAMIN[id] || EVO_ITEM(id)) { yield* scr.say("That can't be used here."); return; }
         if (needsTarget(id)) {
           const t = yield* G.partyScreen({ msg: 'Use on which POKéMON?', pick: function* (m) { return true; } });
           if (t < 0) return;

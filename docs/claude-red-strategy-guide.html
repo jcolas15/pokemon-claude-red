@@ -1,0 +1,510 @@
+<title>Claude Red Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&family=Silkscreen&display=swap">
+<style>
+  :root {
+    --bg: #f3f2f7; --surface: #ffffff; --sunk: #eae8f2; --ink: #1c1a2b; --muted: #5b5670; --line: #dad6e7;
+    --accent: #b9491f; --accent-ink: #ffffff; --gold: #8a5d00; --blue: #3150b0; --warn: #9c2f2f; --good: #1f7a55;
+    --display: "Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --pixel: "Silkscreen", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e0d18; --surface: #171527; --sunk: #1f1c33; --ink: #ebe7f6; --muted: #a09ab8; --line: #2d2946;
+      --accent: #e8906a; --accent-ink: #1b1020; --gold: #ffd66a; --blue: #9bb0ff; --warn: #ff8f80; --good: #6fdcaa;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e0d18; --surface: #171527; --sunk: #1f1c33; --ink: #ebe7f6; --muted: #a09ab8; --line: #2d2946;
+    --accent: #e8906a; --accent-ink: #1b1020; --gold: #ffd66a; --blue: #9bb0ff; --warn: #ff8f80; --good: #6fdcaa;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); padding-inline: 16px; padding-block: 0 56px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+  h2 { font-size: 1.55rem; font-weight: 700; }
+  h3 { font-size: 1.12rem; font-weight: 600; }
+  p { margin: 0; }
+  a { color: var(--blue); }
+  .kicker { font-family: var(--pixel); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .muted { color: var(--muted); }
+  small, .small { font-size: .88rem; }
+
+  /* top: name + section nav */
+  header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); margin-inline: -16px; padding: 10px 16px 0; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .brand b { font-family: var(--pixel); font-weight: 400; font-size: .9rem; letter-spacing: .04em; }
+  .brand span { font-family: var(--pixel); font-size: .68rem; color: var(--muted); }
+  nav.sections { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  nav.sections::-webkit-scrollbar { display: none; }
+  nav.sections a { flex: none; text-decoration: none; color: var(--ink); font-size: .86rem; font-weight: 700; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+  nav.sections a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .intro { padding-block: 28px 8px; display: grid; gap: 12px; }
+  .intro h1 { font-size: clamp(1.9rem, 7vw, 2.6rem); font-weight: 700; }
+  .intro p { max-width: 62ch; color: var(--muted); }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--pixel); font-size: .72rem; color: var(--muted); }
+  .facts b { color: var(--ink); font-weight: 400; }
+
+  section { padding-block: 34px 6px; display: grid; gap: 16px; scroll-margin-top: 110px; }
+  section > header { display: grid; gap: 6px; }
+  section > header p { color: var(--muted); max-width: 62ch; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; }
+  ul.tight { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+  .note { border-left: 3px solid var(--gold); padding: 2px 0 2px 12px; color: var(--ink); }
+  .note.warn { border-color: var(--warn); }
+  .grid2 { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+  kbd { font-family: var(--pixel); font-size: .72rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; background: var(--sunk); }
+
+  /* walkthrough chapters */
+  details.chapter { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  details.chapter + details.chapter { margin-top: -6px; }
+  details.chapter summary { list-style: none; cursor: pointer; padding: 14px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  details.chapter summary::-webkit-details-marker { display: none; }
+  details.chapter summary .step { font-family: var(--pixel); font-size: .7rem; color: var(--accent); width: 3.2em; }
+  details.chapter summary .lv { font-family: var(--pixel); font-size: .68rem; color: var(--muted); white-space: nowrap; }
+  details.chapter summary::after { content: none; }
+  details.chapter[open] summary { border-bottom: 1px solid var(--line); }
+  details.chapter .body { padding: 14px 16px 16px; display: grid; gap: 10px; }
+  details.chapter ol { margin: 0; padding-left: 1.2em; display: grid; gap: 7px; }
+
+  /* type chips */
+  .t { display: inline-flex; align-items: center; gap: 5px; font-family: var(--pixel); font-size: .64rem; letter-spacing: .03em; padding: 2px 7px 2px 6px; border-radius: 4px; border: 1px solid var(--line); background: var(--sunk); color: var(--ink); white-space: nowrap; vertical-align: 1px; }
+  .t::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--c, #888); }
+  .t.NORMAL { --c: #a8a878; } .t.FIRE { --c: #f08030; } .t.WATER { --c: #6890f0; } .t.GRASS { --c: #78c850; } .t.ELECTRIC { --c: #f8d030; }
+  .t.ICE { --c: #98d8d8; } .t.FIGHTING { --c: #c03028; } .t.POISON { --c: #a040a0; } .t.GROUND { --c: #e0c068; } .t.FLYING { --c: #a890f0; }
+  .t.PSYCHIC { --c: #f85888; } .t.BUG { --c: #a8b820; } .t.ROCK { --c: #b8a038; } .t.GHOST { --c: #705898; } .t.DRAGON { --c: #7038f8; }
+
+  /* gym cards */
+  .gym { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+  .gym-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .gym-head .who { display: grid; gap: 3px; }
+  .badge { font-family: var(--pixel); font-size: .66rem; color: var(--gold); letter-spacing: .04em; }
+  .team { display: grid; gap: 4px; }
+  .mon { display: grid; grid-template-columns: 3.4em 1fr; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px dashed var(--line); }
+  .mon:first-child { border-top: 0; }
+  .mon .lvl { font-family: var(--pixel); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mon .nm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 700; }
+  .ace .nm::after { content: "ACE"; font-family: var(--pixel); font-size: .6rem; color: var(--accent); }
+  dl.kv { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; font-size: .93rem; }
+  dl.kv dt { font-family: var(--pixel); font-size: .64rem; color: var(--muted); padding-top: 3px; letter-spacing: .04em; }
+  dl.kv dd { margin: 0; }
+
+  /* tabs for starter-dependent teams */
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--sunk); }
+  .seg button { font: 700 .82rem/1 var(--body); color: var(--muted); background: transparent; border: 0; padding: 9px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .rival-row { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .rival-row:first-of-type { border-top: 0; padding-top: 4px; }
+  .rival-row .where { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-weight: 700; }
+  .rival-row .where span { font-family: var(--pixel); font-size: .66rem; color: var(--muted); font-weight: 400; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font-size: .86rem; padding: 3px 9px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); white-space: nowrap; }
+  .pill i { font-style: normal; font-family: var(--pixel); font-size: .62rem; color: var(--muted); margin-left: 4px; }
+
+  /* catch finder */
+  .finder { display: grid; gap: 12px; }
+  .finder-controls { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  label.fld { display: grid; gap: 5px; font-family: var(--pixel); font-size: .66rem; color: var(--muted); letter-spacing: .04em; }
+  input[type=search], select { font: 16px var(--body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; width: 100%; }
+  .results { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .results .row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .results .row:first-child { border-top: 0; }
+  .results .row .place { font-weight: 700; }
+  .results .row .where-kind { font-family: var(--pixel); font-size: .6rem; color: var(--muted); margin-left: 6px; }
+  .results .row .lv, .results .row .pct { font-family: var(--pixel); font-size: .7rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .results .row .pct { color: var(--accent); min-width: 3.4em; text-align: right; }
+  .results .empty { padding: 14px; color: var(--muted); }
+  .bar { height: 4px; border-radius: 2px; background: var(--sunk); grid-column: 1 / -1; overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { text-align: left; padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  thead th { border-top: 0; font-family: var(--pixel); font-weight: 400; font-size: .64rem; color: var(--muted); letter-spacing: .04em; background: var(--sunk); white-space: nowrap; }
+  td.num { font-family: var(--pixel); font-size: .72rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  footer { padding-block: 40px 0; color: var(--muted); font-size: .86rem; display: grid; gap: 6px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>CLAUDE RED</b><span>FIELD GUIDE</span></div>
+    <nav class="sections" aria-label="Sections">
+      <a href="#start">Start</a>
+      <a href="#walkthrough">Walkthrough</a>
+      <a href="#gyms">Gyms</a>
+      <a href="#rival">Rival</a>
+      <a href="#league">Elite Four</a>
+      <a href="#catch">Catch finder</a>
+      <a href="#legends">Legendaries</a>
+      <a href="#mechanics">Gen 1 rules</a>
+      <a href="#glitches">Glitches</a>
+      <a href="#social">Social Zone</a>
+    </nav>
+  </header>
+
+  <div class="intro">
+    <p class="kicker">Strategy guide · this build</p>
+    <h1>Claude Red Field Guide</h1>
+    <p>Teams, levels and encounter rates on this page were read out of the game's own data files, so they match what you'll actually meet. The story follows Pokémon Red's order beat for beat; the glitches, Battle Tower and quiz are specific to Claude Red.</p>
+    <div class="facts"><span><b>8</b> badges</span><span><b>151</b> Pokémon</span><span><b>224</b> maps</span><span>Champion ace <b>Lv 65</b></span><span>Mewtwo <b>Lv 70</b></span></div>
+  </div>
+
+  <!-- ======================================================= START -->
+  <section id="start">
+    <header><p class="kicker">Before you start</p><h2>Playing on your phone</h2></header>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Controls</h3>
+        <ul class="tight">
+          <li>The on-screen <b>D-pad</b> moves; you can also <b>tap a tile</b> to walk there, or tap a person, sign or menu item to use it.</li>
+          <li><b>A</b> talks and confirms. <b>B</b> cancels; <b>hold B to run</b>.</li>
+          <li><b>START</b> opens the menu (Pokédex, party, bag, SAVE). <b>SELECT</b> reorders items and moves.</li>
+          <li>On a computer: arrows/WASD, <kbd>Z</kbd> for A, <kbd>X</kbd> for B, <kbd>Enter</kbd> for START. Gamepads work too.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Keep your save safe</h3>
+        <ul class="tight">
+          <li>Saves live in the phone's browser <b>for that exact address</b>. Playing at your Mac's Wi-Fi address and later on Vercel counts as two different places.</li>
+          <li>Back up from the title screen: <b>SAVE TRANSFER → DOWNLOAD BACKUP</b>. Restore anywhere with <b>LOAD BACKUP FILE</b>.</li>
+          <li>Over plain Wi-Fi (http), <b>COPY SAVE LINK</b> may not be able to reach the clipboard. The download always works.</li>
+          <li>Clearing Safari's website data, or a private tab, wipes the save.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Which starter?</h3>
+      <p><b>Bulbasaur</b> is the easy start: it beats Brock and Misty and resists Lt. Surge. <b>Squirtle</b> is nearly as smooth and learns Surf-quality attacks early. <b>Charmander</b> is hard mode for the first two gyms: Rock resists Ember and Misty's Water is strong against it. Train a second Pokémon early to share the load (a Nidoran♂ from Route 22, or a Butterfree from Viridian Forest). It pays off later as Charizard.</p>
+      <p class="muted small">Your rival always picks the starter that beats yours, so his team changes with your choice (see <a href="#rival">Rival</a>).</p>
+    </div>
+  </section>
+
+  <!-- ======================================================= WALKTHROUGH -->
+  <section id="walkthrough">
+    <header><p class="kicker">Story order</p><h2>Walkthrough</h2><p>Each chapter ends at a badge. The level on the right is a comfortable target for your lead Pokémon before that chapter's boss.</p></header>
+
+    <details class="chapter" open>
+      <summary><span class="step">01</span><h3>Pallet Town to Pewter City</h3><span class="lv">Lv 12–14</span></summary>
+      <div class="body"><ol>
+        <li>Pick your starter in Oak's lab. Your rival battles you straight away (Lv 5).</li>
+        <li>Walk to Viridian City's Poké Mart, collect <b>Oak's Parcel</b> and bring it back: you get the <b>Pokédex</b> and Poké Balls.</li>
+        <li>Back in Viridian, the old man now shows you how to catch Pokémon. Remember him for the <a href="#glitches">MissingNo. glitch</a>.</li>
+        <li>Optional: Route 22 (west of Viridian) has your rival (Lv 8–9), plus Nidoran♂ and Nidoran♀.</li>
+        <li>Go north through <b>Viridian Forest</b>: mostly Weedle and Kakuna, with Pikachu, Caterpie and Metapod at 5% each.</li>
+        <li><b>Brock</b> (Rock). Water, Grass and Fighting all work, and Rock/Ground takes 4× from Water and Grass.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">02</span><h3>Mt. Moon to Cerulean City</h3><span class="lv">Lv 20–22</span></summary>
+      <div class="body"><ol>
+        <li>Route 3 has lots of trainers and Jigglypuff and Spearow. The Pokémon Center at Mt. Moon's entrance sells a <b>Magikarp</b> for $500; it becomes Gyarados at Lv 20.</li>
+        <li><b>Mt. Moon</b>: Zubat everywhere, plus Clefairy (6%). At the end you choose the <b>Dome Fossil</b> (Kabuto) or <b>Helix Fossil</b> (Omanyte). Cinnabar's lab revives it later.</li>
+        <li>In Cerulean, your rival waits on the bridge north of town (Lv 15–18). Then cross <b>Nugget Bridge</b> (five trainers, then a Rocket who gives a Nugget) to Route 25 and <b>Bill's house</b>. Help Bill and you get the <b>S.S. Ticket</b>.</li>
+        <li><b>Misty</b> (Water): Grass or Electric. Her Starmie at Lv 21 is the real test.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">03</span><h3>Vermilion City and the S.S. Anne</h3><span class="lv">Lv 24–26</span></summary>
+      <div class="body"><ol>
+        <li>Head south through Routes 5–6 (the Underground Path skips Saffron, which is closed for now). The Pokémon Fan Club chairman in Vermilion gives you a <b>Bike Voucher</b>; trade it at Cerulean's bike shop.</li>
+        <li>Board the <b>S.S. Anne</b>. Your rival is on board (Lv 16–20). The seasick captain gives you <b>HM01 Cut</b>.</li>
+        <li>Cut the tree by the gym. <b>Lt. Surge</b> (Electric): <b>Ground is immune</b>. Catch a <b>Diglett</b> in Diglett's Cave (east of Vermilion, via Route 11) and he's easy.</li>
+        <li>With 10+ Pokémon owned, Oak's aide on Route 2 gives <b>HM05 Flash</b> (you need it for Rock Tunnel).</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">04</span><h3>Rock Tunnel, Lavender and Celadon</h3><span class="lv">Lv 30–32</span></summary>
+      <div class="body"><ol>
+        <li>Cut through to Route 9, then go down Route 10 into <b>Rock Tunnel</b> (use Flash) to Lavender Town.</li>
+        <li>Take Route 8 and the Underground Path west to <b>Celadon City</b>. Upstairs in the department store sells TMs and evolution stones. <b>Celadon Mansion</b>: take the back entrance and climb to the rooftop room for a free <b>Eevee</b> (Lv 25).</li>
+        <li><b>Erika</b> (Grass): Fire, Flying, Ice or Psychic. Two of her three are Grass/Poison, so skip Poison moves.</li>
+        <li>The poster in the <b>Game Corner</b> hides the Rocket Hideout. At the bottom, beat Giovanni for the <b>Silph Scope</b>.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">05</span><h3>Pokémon Tower to Fuchsia City</h3><span class="lv">Lv 38–40</span></summary>
+      <div class="body"><ol>
+        <li>With the Silph Scope, climb Lavender's <b>Pokémon Tower</b>. You fight your rival (Lv 20–25), see through the ghost Marowak and rescue <b>Mr. Fuji</b>, who gives you the <b>Poké Flute</b>.</li>
+        <li>Wake the <b>Snorlax</b> blocking Route 12 (or Route 16) with the flute. It's Lv 30, and there are two, so both can be caught.</li>
+        <li>The house on Route 12 gives the <b>Super Rod</b>. On Route 16, Cut behind the Snorlax to reach a house with <b>HM02 Fly</b>.</li>
+        <li>Take Cycling Road (Route 17) or the Route 12–15 coast to Fuchsia. The <b>Safari Zone</b>'s far end has <b>HM03 Surf</b>, and the <b>Gold Teeth</b>. Return the Gold Teeth to the Warden for <b>HM04 Strength</b>. Chansey, Kangaskhan, Scyther, Pinsir and Tauros live in the Safari Zone.</li>
+        <li><b>Koga</b> (Poison): Psychic and Ground. Watch for Weezing's Selfdestruct. There's no Levitate in Gen 1, so Earthquake hits Koffing and Weezing.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">06</span><h3>Saffron City and Silph Co.</h3><span class="lv">Lv 42–44</span></summary>
+      <div class="body"><ol>
+        <li>The thirsty Saffron guards want a drink. Buy one from the vending machines on the Celadon store's rooftop.</li>
+        <li><b>Silph Co.</b> is a teleporter maze with 11 floors. On 7F an employee gives you <b>Lapras</b> (Lv 15), and your rival ambushes you (Lv 35–40). Beat Giovanni on 11F; the president gives you the <b>Master Ball</b>.</li>
+        <li>The <b>Fighting Dojo</b> next to the gym gives <b>Hitmonlee</b> or <b>Hitmonchan</b> after you beat the Karate Master.</li>
+        <li><b>Sabrina</b> (Psychic) is Gen 1's strongest type. <b>Ghost does nothing to Psychic here</b> and Bug moves are weak. Bring a hard hitter with high Special or Attack (Snorlax, Jolteon, Tauros) and your own Psychic-type.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">07</span><h3>Cinnabar Island</h3><span class="lv">Lv 47–50</span></summary>
+      <div class="body"><ol>
+        <li>Surf south from Pallet (Route 21) or from Fuchsia (Routes 19–20, past the <b>Seafoam Islands</b>, home to <b>Articuno</b>).</li>
+        <li>The <b>Pokémon Mansion</b> holds the <b>Secret Key</b> to the gym. Its statues flip the switch doors.</li>
+        <li>The lab revives your fossil (and the Old Amber from Pewter's museum, which becomes <b>Aerodactyl</b>).</li>
+        <li><b>Blaine</b> (Fire): Water, Ground or Rock. His Arcanine at Lv 47 is fast; lead with something bulky.</li>
+        <li>Side trip: Surf Route 10 north of Rock Tunnel to the <b>Power Plant</b>, where <b>Zapdos</b> waits. The Poké Balls there are Voltorb and Electrode traps.</li>
+      </ol></div>
+    </details>
+
+    <details class="chapter">
+      <summary><span class="step">08</span><h3>Viridian Gym and the Pokémon League</h3><span class="lv">Lv 55–60</span></summary>
+      <div class="body"><ol>
+        <li><b>Giovanni</b> (Ground) at Viridian Gym: Water, Grass or Ice. Every one of his team is Ground-based.</li>
+        <li>Route 22 has your rival again (Lv 45–53). Route 23 checks all eight badges, and <b>Victory Road</b> needs Strength for boulder puzzles. <b>Moltres</b> is inside.</li>
+        <li>At Indigo Plateau, stock up (Full Restores, Revives, Max Potion) before the <a href="#league">Elite Four</a>. There's no healing between rooms.</li>
+        <li>After the Hall of Fame: <b>Cerulean Cave</b> opens, with <b>Mewtwo</b> (Lv 70) at the bottom. Save before you touch it. The Master Ball makes it certain.</li>
+      </ol></div>
+    </details>
+
+    <div class="panel">
+      <h3>HMs and the badges that unlock them</h3>
+      <div class="scroll" style="border:0">
+        <table>
+          <thead><tr><th>HM</th><th>Where</th><th>Usable with</th></tr></thead>
+          <tbody>
+            <tr><td>Cut</td><td>S.S. Anne captain</td><td>Cascade Badge (Misty)</td></tr>
+            <tr><td>Fly</td><td>Route 16 house</td><td>Thunder Badge (Lt. Surge)</td></tr>
+            <tr><td>Surf</td><td>Safari Zone, Secret House</td><td>Soul Badge (Koga)</td></tr>
+            <tr><td>Strength</td><td>Safari Zone Warden (Gold Teeth)</td><td>Rainbow Badge (Erika)</td></tr>
+            <tr><td>Flash</td><td>Oak's aide, Route 2 (10 owned)</td><td>Boulder Badge (Brock)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">Badges also raise your stats in battle: Boulder raises Attack, Thunder raises Defense, Soul raises Speed, and Volcano raises Special.</p>
+    </div>
+  </section>
+
+  <!-- ======================================================= GYMS -->
+  <section id="gyms">
+    <header><p class="kicker">Eight badges</p><h2>Gym leaders</h2><p>Exact teams and levels from this build. The star is each leader's strongest Pokémon.</p></header>
+    <div id="gym-list" class="grid2"></div>
+  </section>
+
+  <!-- ======================================================= RIVAL -->
+  <section id="rival">
+    <header><p class="kicker">Blue</p><h2>Rival battles</h2><p>His team depends on your starter. Pick yours to see every fight.</p></header>
+    <div class="panel">
+      <div class="seg" role="group" aria-label="Your starter">
+        <button type="button" data-starter="0" aria-pressed="true">I chose Bulbasaur</button>
+        <button type="button" data-starter="1" aria-pressed="false">Charmander</button>
+        <button type="button" data-starter="2" aria-pressed="false">Squirtle</button>
+      </div>
+      <div id="rival-list"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= LEAGUE -->
+  <section id="league">
+    <header><p class="kicker">Indigo Plateau</p><h2>Elite Four and Champion</h2><p>Four battles in a row, then your rival as Champion, with no Pokémon Center between rooms. Lance's Dragonite is Lv 62 and the Champion's ace is Lv 65.</p></header>
+    <div id="league-list" class="grid2"></div>
+  </section>
+
+  <!-- ======================================================= CATCH -->
+  <section id="catch">
+    <header><p class="kicker">Encounter tables</p><h2>Catch finder</h2><p>Search a Pokémon to see everywhere it appears, or pick a place to see what lives there. Percentages are the chance per encounter in that area's grass or water. For caves with several floors, the best floor is shown.</p></header>
+    <div class="finder">
+      <div class="finder-controls">
+        <label class="fld" for="q">POKéMON<input id="q" type="search" list="mon-names" placeholder="e.g. Pikachu" autocomplete="off"></label>
+        <label class="fld" for="place">PLACE<select id="place"><option value="">Choose a route or area…</option></select></label>
+      </div>
+      <datalist id="mon-names"></datalist>
+      <div class="results" id="results" aria-live="polite"><div class="empty">Type a name or choose a place.</div></div>
+    </div>
+    <div class="panel">
+      <h3>Fishing</h3>
+      <ul class="tight">
+        <li><b>Old Rod</b> (fishing guru, Vermilion): Magikarp only.</li>
+        <li><b>Good Rod</b> (Fuchsia): <span id="good-rod"></span>.</li>
+        <li><b>Super Rod</b> (Route 12 house): depends on where you fish; search a water Pokémon above to see.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>In-game trades</h3>
+      <p class="muted small">NPCs in towns and Pokémon Centers swap these (you give → you get, with its nickname). Several are the only way to get that Pokémon in Red.</p>
+      <div class="pills" id="trades"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= LEGENDS -->
+  <section id="legends">
+    <header><p class="kicker">One chance each</p><h2>Legendaries and one-offs</h2><p>These don't come back if they faint, so <b>save first</b>. Put them to sleep or paralyze them before throwing balls, and bring Ultra Balls.</p></header>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Pokémon</th><th>Lv</th><th>Where</th><th>Tip</th></tr></thead>
+        <tbody>
+          <tr><td><b>Articuno</b> <span class="t ICE">ICE</span></td><td class="num">50</td><td>Seafoam Islands, bottom floor (Strength boulder puzzle with the currents)</td><td>Fire and Rock hit hard; it uses Blizzard.</td></tr>
+          <tr><td><b>Zapdos</b> <span class="t ELECTRIC">ELECTRIC</span></td><td class="num">50</td><td>Power Plant (Surf up Route 10)</td><td>A Ground-type ignores its Electric moves, but Ground attacks can't hit it (it's part Flying). Rock and Ice hit hard.</td></tr>
+          <tr><td><b>Moltres</b> <span class="t FIRE">FIRE</span></td><td class="num">50</td><td>Victory Road</td><td>Rock and Water. Watch out for its Sky Attack.</td></tr>
+          <tr><td><b>Mewtwo</b> <span class="t PSYCHIC">PSYCHIC</span></td><td class="num">70</td><td>Cerulean Cave, after the Hall of Fame</td><td>The Master Ball is the easy answer. Otherwise it Recovers, so status first.</td></tr>
+          <tr><td><b>Snorlax</b> ×2 <span class="t NORMAL">NORMAL</span></td><td class="num">30</td><td>Routes 12 and 16, woken by the Poké Flute</td><td>Worth catching: huge HP and Attack.</td></tr>
+          <tr><td>Voltorb ×6 / Electrode ×2</td><td class="num">40 / 43</td><td>Power Plant "items"</td><td>They Selfdestruct. Lead with a Ground-type.</td></tr>
+          <tr><td><b>Mew</b> <span class="t PSYCHIC">PSYCHIC</span></td><td class="num">7</td><td>Only via the <a href="#glitches">Trainer-Fly glitch</a></td><td>Faithful to the original: there's no normal way to meet it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Gift Pokémon</h3>
+      <div class="pills">
+        <span class="pill">Magikarp <i>Lv5 · Mt. Moon Center, $500</i></span>
+        <span class="pill">Eevee <i>Lv25 · Celadon Mansion roof room</i></span>
+        <span class="pill">Lapras <i>Lv15 · Silph Co. 7F</i></span>
+        <span class="pill">Hitmonlee or Hitmonchan <i>Fighting Dojo</i></span>
+        <span class="pill">Kabuto or Omanyte <i>Mt. Moon fossil → Cinnabar Lab</i></span>
+        <span class="pill">Aerodactyl <i>Old Amber → Cinnabar Lab</i></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= MECHANICS -->
+  <section id="mechanics">
+    <header><p class="kicker">It plays like 1996</p><h2>Gen 1 rules worth knowing</h2><p>Claude Red keeps the original's battle math, quirks included. These change how you build a team.</p></header>
+    <div class="grid2">
+      <div class="panel"><h3>Psychic is king</h3><p><b>Ghost moves do nothing to Psychic</b> (the original's bug), and Bug moves are few and weak. Your best answers to Alakazam and friends are strong Normal or Psychic attackers with high Special.</p></div>
+      <div class="panel"><h3>One Special stat</h3><p>Special covers both special attack and special defense, so Amnesia doubles both at once. Types decide physical vs special: Fire, Water, Grass, Electric, Ice, Psychic and Dragon moves are special.</p></div>
+      <div class="panel"><h3>Critical hits come from Speed</h3><p>Crit chance is based on your Pokémon's base Speed, and <b>Slash, Karate Chop, Razor Leaf and Crabhammer</b> crit about 8× as often. Fast Pokémon like Persian and Jolteon crit a lot.</p></div>
+      <div class="panel"><h3>Odd matchups</h3><p>Bug and Poison are super-effective on <i>each other</i>. Ice is only neutral against Fire. Keep this in mind against Koga and Erika.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= GLITCHES -->
+  <section id="glitches">
+    <header><p class="kicker">Rebuilt from the original code</p><h2>Glitches</h2><p>Claude Red recreates the famous Red and Blue glitches from how the original game actually worked. They're safe here: nothing corrupts your save file.</p></header>
+    <div class="panel">
+      <h3>MissingNo. and the old man</h3>
+      <ol class="tight" style="padding-left:1.2em">
+        <li>After you have the Pokédex, talk to the <b>old man in Viridian City</b> and watch his catching demo.</li>
+        <li><b>Fly straight to Cinnabar Island</b>. Visiting any map with wild grass encounters first overwrites the effect.</li>
+        <li>Surf up and down the <b>east coast of Cinnabar</b>, on the water tiles right against the shoreline.</li>
+        <li>Wild Pokémon there are read from the letters of <b>your name</b>, so different names give different encounters. Some letters give real high-level Pokémon; others give <b>MISSINGNO.</b> or <b>'M</b>.</li>
+      </ol>
+      <p class="note">Meeting MissingNo. adds <b>128 to the 6th item in your bag</b>, the classic way to duplicate Rare Candies or Master Balls. Put the item you want in slot 6 first.</p>
+      <p class="note warn">Side effect: the Hall of Fame screen shows scrambled records afterwards, just like the original. It's only a display effect; your save itself is untouched.</p>
+    </div>
+    <div class="panel">
+      <h3>The Mew trick (Trainer-Fly)</h3>
+      <ol class="tight" style="padding-left:1.2em">
+        <li>Walk into the sight line of a trainer you haven't fought yet, and <b>press START mid-step</b> just as they spot you, so the menu opens before the battle. The classic setup uses a trainer on Route 8, next to Lavender Town.</li>
+        <li>From that open menu, leave with <b>Fly</b> (or Teleport, Dig or an Escape Rope). Fly to Cerulean City. Until your next trainer battle, the START menu won't open and people won't talk to you.</li>
+        <li>Walk to Route 25 and let the <b>Youngster with the Lv 17 Slowpoke</b> spot you (you must not have fought him yet). Beat Slowpoke <b>without lowering its Attack</b>. Its Special stat is 21, which is Mew's internal number, and its unchanged Attack stage (7) becomes the level.</li>
+        <li>Your menu works again. Fly to Lavender and walk back onto the route you escaped from. The START menu opens by itself. Close it and a <b>Lv 7 Mew</b> battle starts.</li>
+      </ol>
+      <p class="muted small">Another opponent's leftover stats give other Pokémon: the last enemy's Special picks the species and its Attack stage sets the level.</p>
+    </div>
+  </section>
+
+  <!-- ======================================================= SOCIAL -->
+  <section id="social">
+    <header><p class="kicker">Cable Club, any Pokémon Center</p><h2>Social Zone and extras</h2><p>The Cable Club receptionist in every Pokémon Center takes you to the Social Zone.</p></header>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Battle Tower</h3>
+        <ul class="tight">
+          <li>Pick <b>3 Pokémon</b>. They're healed and set to <b>Lv 50</b> for every fight. There are no items and no EXP.</li>
+          <li>Each win earns <b>1 BP</b>, and every 7th win in a row adds 3 more. One loss resets the streak.</li>
+          <li>Opponents are built from strong level-up and TM moves and never use legendaries. Sleep and paralysis are your best friends.</li>
+        </ul>
+        <p class="small"><b>BP prizes:</b> <span id="prizes"></span></p>
+      </div>
+      <div class="panel">
+        <h3>Friends, trades and versus</h3>
+        <ul class="tight">
+          <li><b>Link battles:</b> share your team as a link, and your friend battles it. No server is involved.</li>
+          <li><b>Trades by link:</b> send an offer, your friend answers, and both sides get the Pokémon. Trade evolutions (Kadabra, Haunter, Machoke, Graveler) evolve this way.</li>
+          <li><b>Local versus:</b> 2 players on one device.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Who's That Pokémon?</h3>
+        <p>On the title screen: name the silhouette before time runs out. <b>DAILY</b> gives everyone the same 10 each day; <b>ENDLESS</b> runs until you miss.</p>
+      </div>
+      <div class="panel">
+        <h3>Share and customize</h3>
+        <p>A new game lets you design your trainer's look. <b>SHARE</b> in the START menu makes cards for badges, catches and Pokédex milestones.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made for this copy of Claude Red. Teams, levels, encounter rates, static Pokémon and Battle Tower prizes are taken from the game's data. Directions follow Pokémon Red's story, which this game reproduces.</p>
+    <p>Pokémon © Nintendo / Creatures / GAME FREAK. Fan project, not affiliated.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const DATA = {"gyms":[{"name":"Brock","city":"Pewter City","badge":"BOULDER BADGE","type":"ROCK","team":[["GEODUDE",12,["ROCK","GROUND"]],["ONIX",14,["ROCK","GROUND"]]],"bring":"Water or Grass (4× on both his Pokémon), Fighting.","watch":"Onix is slow but tanky; Bide doubles back damage, so use status moves while it charges.","reward":"BOULDER Badge (Flash, Attack boost) + TM BIDE"},{"name":"Misty","city":"Cerulean City","badge":"CASCADE BADGE","type":"WATER","team":[["STARYU",18,["WATER"]],["STARMIE",21,["WATER","PSYCHIC"]]],"bring":"Grass or Electric. A Pikachu from Viridian Forest carries this fight.","watch":"Starmie is fast, uses Harden to toughen up, and hits with Bubblebeam. Finish it quickly.","reward":"CASCADE Badge (Cut) + TM BUBBLEBEAM"},{"name":"Lt. Surge","city":"Vermilion City","badge":"THUNDER BADGE","type":"ELECTRIC","team":[["VOLTORB",21,["ELECTRIC"]],["PIKACHU",18,["ELECTRIC"]],["RAICHU",24,["ELECTRIC"]]],"bring":"Ground: Diglett or Dugtrio from Diglett's Cave is immune to everything he has.","watch":"Pikachu and Raichu use Thunder Wave to paralyze, and Raichu has Thunderbolt. Water and Flying Pokémon take double.","reward":"THUNDER Badge (Fly, Defense boost) + TM THUNDERBOLT"},{"name":"Erika","city":"Celadon City","badge":"RAINBOW BADGE","type":"GRASS","team":[["VICTREEBEL",29,["GRASS","POISON"]],["TANGELA",24,["GRASS"]],["VILEPLUME",29,["GRASS","POISON"]]],"bring":"Fire, Flying, Ice or Psychic.","watch":"Vileplume's Sleep Powder and Petal Dance, Victreebel's Poisonpowder and Wrap. Bring Awakenings and Antidotes.","reward":"RAINBOW Badge (Strength) + TM MEGA DRAIN"},{"name":"Koga","city":"Fuchsia City","badge":"SOUL BADGE","type":"POISON","team":[["KOFFING",37,["POISON"]],["MUK",39,["POISON"]],["KOFFING",37,["POISON"]],["WEEZING",43,["POISON"]]],"bring":"Psychic or Ground (no Levitate in Gen 1).","watch":"Weezing's Toxic damage grows every turn; Smokescreen and Muk's Minimize make you miss. Muk also has Disable.","reward":"SOUL Badge (Surf, Speed boost) + TM TOXIC"},{"name":"Sabrina","city":"Saffron City","badge":"MARSH BADGE","type":"PSYCHIC","team":[["KADABRA",38,["PSYCHIC"]],["MR.MIME",37,["PSYCHIC"]],["VENOMOTH",38,["BUG","POISON"]],["ALAKAZAM",43,["PSYCHIC"]]],"bring":"Strong physical hitters (Snorlax, Tauros), fast Special users (Jolteon), or your own Psychic.","watch":"Ghost moves do 0 to Psychic in Gen 1. Alakazam is extremely fast with high Special.","reward":"MARSH Badge + TM PSYWAVE"},{"name":"Blaine","city":"Cinnabar Island","badge":"VOLCANO BADGE","type":"FIRE","team":[["GROWLITHE",42,["FIRE"]],["PONYTA",40,["FIRE"]],["RAPIDASH",42,["FIRE"]],["ARCANINE",47,["FIRE"]]],"bring":"Water, Ground or Rock.","watch":"Arcanine is fast and hits hard; Fire Blast has a burn chance.","reward":"VOLCANO Badge (Special boost) + TM FIRE BLAST"},{"name":"Giovanni","city":"Viridian City","badge":"EARTH BADGE","type":"GROUND","team":[["RHYHORN",45,["GROUND","ROCK"]],["DUGTRIO",42,["GROUND"]],["NIDOQUEEN",44,["POISON","GROUND"]],["NIDOKING",45,["POISON","GROUND"]],["RHYDON",50,["GROUND","ROCK"]]],"bring":"Water, Grass or Ice. Every Pokémon he has is weak to Water.","watch":"Rhydon's Fissure and Rhyhorn's Horn Drill are one-hit KOs. Rhydon is the wall, so use special attacks.","reward":"EARTH Badge + TM FISSURE"}],"league":[{"role":"ELITE FOUR 1","name":"Lorelei","type":"ICE","team":[["DEWGONG",54,["WATER","ICE"]],["CLOYSTER",53,["WATER","ICE"]],["SLOWBRO",54,["WATER","PSYCHIC"]],["JYNX",56,["ICE","PSYCHIC"]],["LAPRAS",56,["WATER","ICE"]]],"bring":"Electric (most are Water/Ice), Fighting or Rock. Jynx is weak to Fire, Rock, Bug and Ghost."},{"role":"ELITE FOUR 2","name":"Bruno","type":"FIGHTING","team":[["ONIX",53,["ROCK","GROUND"]],["HITMONCHAN",55,["FIGHTING"]],["HITMONLEE",55,["FIGHTING"]],["ONIX",56,["ROCK","GROUND"]],["MACHAMP",58,["FIGHTING"]]],"bring":"Psychic and Flying for the Fighting-types; Water or Grass for both Onix."},{"role":"ELITE FOUR 3","name":"Agatha","type":"GHOST","team":[["GENGAR",56,["GHOST","POISON"]],["GOLBAT",56,["POISON","FLYING"]],["HAUNTER",55,["GHOST","POISON"]],["ARBOK",58,["POISON"]],["GENGAR",60,["GHOST","POISON"]]],"bring":"Psychic and Ground: every Gengar and Haunter is part Poison. Ghost moves are weak here."},{"role":"ELITE FOUR 4","name":"Lance","type":"DRAGON","team":[["GYARADOS",58,["WATER","FLYING"]],["DRAGONAIR",56,["DRAGON"]],["DRAGONAIR",56,["DRAGON"]],["AERODACTYL",60,["ROCK","FLYING"]],["DRAGONITE",62,["DRAGON","FLYING"]]],"bring":"Ice: Dragonite takes 4× and Dragonair 2×. Electric for Gyarados (4×). Rock for Aerodactyl is hard, so use Water or Electric."},{"role":"CHAMPION","name":"Your rival","type":"","team":[["PIDGEOT",61,["NORMAL","FLYING"]],["ALAKAZAM",59,["PSYCHIC"]],["RHYDON",61,["GROUND","ROCK"]]],"bring":"Three more depend on your starter (see Rival). Cover Alakazam with a hard hitter and Rhydon with Water or Grass."}],"rival":[{"where":"Oak's lab","when":"After you pick a starter","teams":[[["CHARMANDER",5]],[["SQUIRTLE",5]],[["BULBASAUR",5]]]},{"where":"Route 22","when":"Optional, before Brock","teams":[[["PIDGEY",9],["CHARMANDER",8]],[["PIDGEY",9],["SQUIRTLE",8]],[["PIDGEY",9],["BULBASAUR",8]]]},{"where":"Cerulean City","when":"North bridge, before Misty","teams":[[["PIDGEOTTO",18],["ABRA",15],["RATTATA",15],["CHARMANDER",17]],[["PIDGEOTTO",18],["ABRA",15],["RATTATA",15],["SQUIRTLE",17]],[["PIDGEOTTO",18],["ABRA",15],["RATTATA",15],["BULBASAUR",17]]]},{"where":"S.S. Anne","when":"Before Lt. Surge","teams":[[["PIDGEOTTO",19],["RATICATE",16],["KADABRA",18],["CHARMELEON",20]],[["PIDGEOTTO",19],["RATICATE",16],["KADABRA",18],["WARTORTLE",20]],[["PIDGEOTTO",19],["RATICATE",16],["KADABRA",18],["IVYSAUR",20]]]},{"where":"Pokémon Tower","when":"Lavender, 2F","teams":[[["PIDGEOTTO",25],["EXEGGCUTE",23],["GYARADOS",22],["KADABRA",20],["CHARMELEON",25]],[["PIDGEOTTO",25],["GROWLITHE",23],["EXEGGCUTE",22],["KADABRA",20],["WARTORTLE",25]],[["PIDGEOTTO",25],["GYARADOS",23],["GROWLITHE",22],["KADABRA",20],["IVYSAUR",25]]]},{"where":"Silph Co.","when":"7F, before Giovanni","teams":[[["PIDGEOT",37],["EXEGGCUTE",38],["GYARADOS",35],["ALAKAZAM",35],["CHARIZARD",40]],[["PIDGEOT",37],["GROWLITHE",38],["EXEGGCUTE",35],["ALAKAZAM",35],["BLASTOISE",40]],[["PIDGEOT",37],["GYARADOS",38],["GROWLITHE",35],["ALAKAZAM",35],["VENUSAUR",40]]]},{"where":"Route 22","when":"After the 8th badge","teams":[[["PIDGEOT",47],["RHYHORN",45],["EXEGGCUTE",45],["GYARADOS",47],["ALAKAZAM",50],["CHARIZARD",53]],[["PIDGEOT",47],["RHYHORN",45],["GROWLITHE",45],["EXEGGCUTE",47],["ALAKAZAM",50],["BLASTOISE",53]],[["PIDGEOT",47],["RHYHORN",45],["GYARADOS",45],["GROWLITHE",47],["ALAKAZAM",50],["VENUSAUR",53]]]},{"where":"Champion","when":"Indigo Plateau","teams":[[["PIDGEOT",61],["ALAKAZAM",59],["RHYDON",61],["EXEGGUTOR",61],["GYARADOS",63],["CHARIZARD",65]],[["PIDGEOT",61],["ALAKAZAM",59],["RHYDON",61],["ARCANINE",61],["EXEGGUTOR",63],["BLASTOISE",65]],[["PIDGEOT",61],["ALAKAZAM",59],["RHYDON",61],["GYARADOS",61],["ARCANINE",63],["VENUSAUR",65]]]}],"wild":{"ROUTE 1":{"grass":[["PIDGEY","2-5",50],["RATTATA","2-4",50]]},"ROUTE 2":{"grass":[["PIDGEY","3-5",45],["RATTATA","2-5",40],["WEEDLE","3-5",15]]},"ROUTE 3":{"grass":[["PIDGEY","6-8",45],["SPEAROW","5-8",45],["JIGGLYPUFF","3-7",11]]},"ROUTE 4":{"grass":[["RATTATA","8-12",40],["SPEAROW","8-12",35],["EKANS","6-12",25]]},"ROUTE 5":{"grass":[["PIDGEY","13-16",40],["ODDISH","13-16",35],["MANKEY","10-16",25]]},"ROUTE 6":{"grass":[["PIDGEY","13-16",40],["ODDISH","13-16",35],["MANKEY","10-16",25]]},"ROUTE 7":{"grass":[["MANKEY","17-20",30],["PIDGEY","19-22",30],["ODDISH","19-22",30],["GROWLITHE","18-20",10]]},"ROUTE 8":{"grass":[["PIDGEY","18-20",30],["MANKEY","18-20",30],["EKANS","17-19",20],["GROWLITHE","15-18",20]]},"ROUTE 9":{"grass":[["RATTATA","14-17",40],["SPEAROW","13-17",35],["EKANS","11-17",25]]},"ROUTE 10":{"grass":[["VOLTORB","14-17",40],["SPEAROW","13-17",35],["EKANS","11-17",25]]},"ROUTE 11":{"grass":[["EKANS","12-15",40],["SPEAROW","13-17",35],["DROWZEE","9-15",25]]},"ROUTE 12":{"grass":[["PIDGEY","23-27",40],["ODDISH","22-26",35],["VENONAT","24-26",20],["GLOOM","28-30",5]]},"ROUTE 13":{"grass":[["PIDGEY","25-27",35],["ODDISH","22-26",35],["VENONAT","24-26",20],["GLOOM","28-30",5],["DITTO","25",5]]},"ROUTE 14":{"grass":[["ODDISH","22-26",35],["PIDGEY","26",20],["VENONAT","24-26",20],["DITTO","23",15],["PIDGEOTTO","28-30",5],["GLOOM","30",5]]},"ROUTE 15":{"grass":[["ODDISH","22-26",35],["DITTO","26",20],["VENONAT","26-28",20],["PIDGEY","23",15],["PIDGEOTTO","28-30",5],["GLOOM","30",5]]},"ROUTE 16":{"grass":[["SPEAROW","20-22",40],["RATTATA","18-22",30],["DODUO","18-22",25],["RATICATE","23-25",5]]},"ROUTE 17":{"grass":[["SPEAROW","20-22",40],["RATICATE","25-29",30],["DODUO","24-28",25],["FEAROW","25-27",5]]},"ROUTE 18":{"grass":[["SPEAROW","20-22",40],["DODUO","24-28",25],["RATICATE","25-29",20],["FEAROW","25-29",15]]},"ROUTE 19":{"water":[["TENTACOOL","5-40",100]]},"ROUTE 20":{"water":[["TENTACOOL","5-40",100]]},"ROUTE 21":{"grass":[["RATTATA","21-23",30],["PIDGEY","21-23",30],["RATICATE","30",15],["PIDGEOTTO","30-32",15],["TANGELA","28-32",11]],"water":[["TENTACOOL","5-40",100]]},"ROUTE 22":{"grass":[["RATTATA","2-4",45],["NIDORAN♂","2-4",39],["SPEAROW","3-5",10],["NIDORAN♀","3-4",5]]},"ROUTE 23":{"grass":[["DITTO","33-43",35],["FEAROW","38-43",25],["EKANS","26",20],["SPEAROW","26",15],["ARBOK","41",5]]},"ROUTE 24":{"grass":[["ODDISH","12-14",25],["PIDGEY","12-13",20],["WEEDLE","7",20],["KAKUNA","8",20],["ABRA","8-12",15]]},"ROUTE 25":{"grass":[["ODDISH","12-14",25],["WEEDLE","8",20],["KAKUNA","9",20],["PIDGEY","13",15],["ABRA","10-12",15],["METAPOD","7",4],["CATERPIE","8",1]]},"VIRIDIAN FOREST":{"grass":[["WEEDLE","3-5",45],["KAKUNA","4-6",39],["PIKACHU","3-5",5],["METAPOD","4",5],["CATERPIE","3",5]]},"MT.MOON":{"grass":[["ZUBAT","6-12",79],["GEODUDE","7-10",30],["PARAS","8-12",15],["CLEFAIRY","8-12",6]]},"ROCK TUNNEL":{"grass":[["ZUBAT","15-18",55],["GEODUDE","16-18",26],["MACHOP","15-17",15],["ONIX","13-17",9]]},"POWER PLANT":{"grass":[["VOLTORB","21-23",30],["MAGNEMITE","21-23",30],["PIKACHU","20-24",25],["MAGNETON","32-35",10],["ELECTABUZZ","33-36",5]]},"VICTORY ROAD":{"grass":[["ONIX","36-45",29],["MACHOP","22-24",20],["GEODUDE","24-26",20],["ZUBAT","22-26",15],["VENOMOTH","40",10],["MACHOKE","41-45",5],["GRAVELER","41-43",5],["GOLBAT","40-41",5],["MAROWAK","40-43",4]]},"POKéMON TOWER":{"grass":[["GASTLY","18-24",89],["HAUNTER","25-30",15],["CUBONE","20-24",10]]},"SEAFOAM ISLANDS":{"grass":[["HORSEA","28-33",35],["SLOWPOKE","28-33",35],["SEEL","28-33",35],["SHELLDER","28-33",30],["STARYU","30",20],["ZUBAT","21",10],["GOLBAT","29-32",5],["PSYDUCK","28",5],["DEWGONG","37-38",4],["SEADRA","37-39",4],["SLOWBRO","37-39",4],["GOLDUCK","38",1]]},"POKéMON MANSION":{"grass":[["KOFFING","30-35",50],["PONYTA","28-36",40],["GROWLITHE","32-35",20],["WEEZING","37-42",15],["GRIMER","30-35",5],["MUK","37-42",1]]},"DIGLETT's CAVE":{"grass":[["DIGLETT","15-22",95],["DUGTRIO","29-31",5]]},"SAFARI ZONE":{"grass":[["NIDORAN♂","22-25",20],["DODUO","26",20],["RHYHORN","25-26",20],["EXEGGCUTE","23-27",20],["PARAS","22-23",15],["VENONAT","22-23",15],["NIDORINO","30-33",10],["NIDORAN♀","24-25",5],["PARASECT","25-30",5],["NIDORINA","30-31",5],["VENOMOTH","31-32",5],["KANGASKHAN","25-28",4],["SCYTHER","23-28",4],["CHANSEY","23-26",4],["TAUROS","26-28",4]]},"CERULEAN CAVE":{"grass":[["DODRIO","49-51",20],["VENOMOTH","49-51",20],["RHYDON","52-55",20],["MAROWAK","52-55",20],["GOLBAT","46",20],["HYPNO","46",20],["KADABRA","49-51",15],["ELECTRODE","52-55",15],["MAGNETON","46",15],["DITTO","53-67",11],["CHANSEY","56-64",10],["PARASECT","52-64",10],["RAICHU","53-64",10],["ARBOK","52-57",10],["WIGGLYTUFF","54",5]]}},"superRod":{"PALLET TOWN":["TENTACOOL","POLIWAG"],"VIRIDIAN CITY":["TENTACOOL","POLIWAG"],"CERULEAN CITY":["PSYDUCK","GOLDEEN","KRABBY"],"VERMILION CITY":["KRABBY","SHELLDER"],"CELADON CITY":["POLIWHIRL","SLOWPOKE"],"FUCHSIA CITY":["SEAKING","KRABBY","GOLDEEN","MAGIKARP"],"CINNABAR ISLAND":["STARYU","HORSEA","SHELLDER","GOLDEEN"],"ROUTE 4":["PSYDUCK","GOLDEEN","KRABBY"],"ROUTE 6":["KRABBY","SHELLDER"],"ROUTE 10":["POLIWHIRL","SLOWPOKE"],"ROUTE 11":["KRABBY","SHELLDER"],"ROUTE 12":["TENTACOOL","KRABBY","GOLDEEN","MAGIKARP"],"ROUTE 13":["TENTACOOL","KRABBY","GOLDEEN","MAGIKARP"],"ROUTE 17":["TENTACOOL","KRABBY","GOLDEEN","MAGIKARP"],"ROUTE 18":["TENTACOOL","KRABBY","GOLDEEN","MAGIKARP"],"ROUTE 19":["STARYU","HORSEA","SHELLDER","GOLDEEN"],"ROUTE 20":["STARYU","HORSEA","SHELLDER","GOLDEEN"],"ROUTE 21":["STARYU","HORSEA","SHELLDER","GOLDEEN"],"ROUTE 22":["GOLDEEN","POLIWAG"],"ROUTE 23":["SLOWBRO","SEAKING","KINGLER","SEADRA"],"ROUTE 24":["PSYDUCK","GOLDEEN","KRABBY"],"ROUTE 25":["PSYDUCK","GOLDEEN","KRABBY"],"CERULEAN GYM":["PSYDUCK","GOLDEEN","KRABBY"],"VERMILION DOCK":["KRABBY","SHELLDER"],"SEAFOAM ISLANDS":["STARYU","HORSEA","SHELLDER","GOLDEEN"],"SAFARI ZONE":["DRATINI","KRABBY","PSYDUCK","SLOWPOKE"],"CERULEAN CAVE":["SLOWBRO","SEAKING","KINGLER","SEADRA"]},"good":["GOLDEEN 10","POLIWAG 10"],"trades":[["NIDORINO","NIDORINA","TERRY"],["ABRA","MR.MIME","MARCEL"],["BUTTERFREE","BEEDRILL","CHIKUCHIKU"],["PONYTA","SEEL","SAILOR"],["SPEAROW","FARFETCH'D","DUX"],["SLOWBRO","LICKITUNG","MARC"],["POLIWHIRL","JYNX","LOLA"],["RAICHU","ELECTRODE","DORIS"],["VENONAT","TANGELA","CRINKLES"],["NIDORAN♂","NIDORAN♀","SPOT"]],"prizes":[["RARE CANDY","5 BP"],["PP UP","8 BP"],["HP UP","4 BP"],["PROTEIN","4 BP"],["IRON","4 BP"],["CARBOS","4 BP"],["CALCIUM","4 BP"],["MAX ELIXER","5 BP"],["FULL RESTORE","3 BP"],["MAX REVIVE","3 BP"],["NUGGET","6 BP"],["MASTER BALL","60 BP"]]};
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cap = s => s.toLowerCase().replace(/(^|[\s.-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/Mt\.moon/i, 'Mt. Moon').replace(/Pokémon/i, 'Pokémon').replace(/Diglett'S/, "Diglett's");
+  const chip = t => '<span class="t ' + t + '">' + t + '</span>';
+  const monRow = (m, ace) => '<div class="mon' + (ace ? ' ace' : '') + '"><span class="lvl">Lv ' + m[1] + '</span><span class="nm">' + esc(cap(m[0])) + ' ' + m[2].map(chip).join(' ') + '</span></div>';
+  const teamHtml = team => { const top = Math.max(...team.map(m => m[1])); let marked = false; return '<div class="team">' + team.map(m => { const a = !marked && m[1] === top; if (a) marked = true; return monRow(m, a); }).join('') + '</div>'; };
+
+  // gyms
+  $('#gym-list').innerHTML = DATA.gyms.map(g => '<article class="gym"><div class="gym-head"><div class="who"><span class="badge">' + esc(g.badge) + '</span><h3>' + esc(g.name) + ' · ' + esc(g.city) + '</h3></div>' + chip(g.type) + '</div>' + teamHtml(g.team) +
+    '<dl class="kv"><dt>BRING</dt><dd>' + g.bring + '</dd><dt>WATCH</dt><dd>' + g.watch + '</dd><dt>REWARD</dt><dd>' + g.reward + '</dd></dl></article>').join('');
+
+  // league
+  $('#league-list').innerHTML = DATA.league.map(g => '<article class="gym"><div class="gym-head"><div class="who"><span class="badge">' + esc(g.role) + '</span><h3>' + esc(g.name) + '</h3></div>' + (g.type ? chip(g.type) : '') + '</div>' + teamHtml(g.team) +
+    '<dl class="kv"><dt>BRING</dt><dd>' + g.bring + '</dd></dl></article>').join('');
+
+  // rival
+  function rival(i) {
+    document.querySelectorAll('[data-starter]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.starter === i)));
+    $('#rival-list').innerHTML = DATA.rival.map(r => '<div class="rival-row"><div class="where">' + esc(r.where) + '<span>' + esc(r.when) + '</span></div><div class="pills">' +
+      r.teams[i].map(m => '<span class="pill">' + esc(cap(m[0])) + '<i>Lv' + m[1] + '</i></span>').join('') + '</div></div>').join('');
+  }
+  document.querySelectorAll('[data-starter]').forEach(b => b.addEventListener('click', () => rival(+b.dataset.starter)));
+  rival(0);
+
+  // catch finder
+  const byMon = {};
+  for (const [place, kinds] of Object.entries(DATA.wild)) for (const [kind, list] of Object.entries(kinds)) for (const [mon, lv, p] of list) (byMon[mon] = byMon[mon] || []).push({ place, kind, lv, p });
+  for (const [place, mons] of Object.entries(DATA.superRod)) for (const mon of mons) (byMon[mon] = byMon[mon] || []).push({ place, kind: 'super rod', lv: '', p: null });
+  const names = Object.keys(byMon).sort();
+  $('#mon-names').innerHTML = names.map(n => '<option value="' + esc(cap(n)) + '">').join('');
+  $('#place').innerHTML += Object.keys(DATA.wild).map(p => '<option value="' + esc(p) + '">' + esc(cap(p)) + '</option>').join('');
+  const row = (label, kind, lv, p) => '<div class="row"><span class="place">' + esc(label) + '<span class="where-kind">' + esc(kind.toUpperCase()) + '</span></span><span class="lv">' + (lv ? 'Lv ' + esc(lv) : '') + '</span><span class="pct">' + (p == null ? '—' : p + '%') + '</span>' +
+    (p == null ? '' : '<div class="bar"><span style="width:' + Math.min(100, p) + '%"></span></div>') + '</div>';
+  function showMon(v) {
+    const key = names.find(n => n === v.trim().toUpperCase()) || names.find(n => n.startsWith(v.trim().toUpperCase()));
+    if (!v.trim()) { $('#results').innerHTML = '<div class="empty">Type a name or choose a place.</div>'; return; }
+    if (!key) { $('#results').innerHTML = '<div class="empty">No wild encounters for "' + esc(v) + '". It may be a gift, trade, fossil or evolution-only Pokémon.</div>'; return; }
+    const list = byMon[key].slice().sort((a, b) => (b.p || 0) - (a.p || 0));
+    $('#results').innerHTML = '<div class="row"><span class="place">' + esc(cap(key)) + '</span><span class="lv"></span><span class="pct"></span></div>' + list.map(e => row(cap(e.place), e.kind, e.lv, e.p)).join('');
+  }
+  function showPlace(p) {
+    if (!p) return;
+    const k = DATA.wild[p], out = [];
+    for (const [kind, list] of Object.entries(k)) for (const [mon, lv, pc] of list) out.push(row(cap(mon), kind, lv, pc));
+    if (DATA.superRod[p]) for (const mon of DATA.superRod[p]) out.push(row(cap(mon), 'super rod', '', null));
+    $('#results').innerHTML = out.join('');
+  }
+  $('#q').addEventListener('input', e => { $('#place').value = ''; showMon(e.target.value); });
+  $('#place').addEventListener('change', e => { $('#q').value = ''; showPlace(e.target.value); });
+  $('#good-rod').textContent = DATA.good.map(cap).join(', ');
+  $('#trades').innerHTML = DATA.trades.map(t => '<span class="pill">' + esc(cap(t[0])) + ' → ' + esc(cap(t[1])) + '<i>' + esc(t[2]) + '</i></span>').join('');
+  $('#prizes').textContent = DATA.prizes.map(p => cap(p[0].replace(/_/g, ' ')) + ' ' + p[1]).join(' · ');
+  showMon('Pikachu'); $('#q').value = 'Pikachu';
+})();
+</script>

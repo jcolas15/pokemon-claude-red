@@ -1,4 +1,4 @@
-// Opening sequence, parodying Red's: a shooting star brings in the "LEVY ST. GAMES presents" card, then a
+// Opening sequence, parodying Red's: a shooting star brings in the "TnJ presents" card, then a
 // letterboxed battle of the two logos, CLAUDE vs CHATGPT, where Red had NIDORINO vs GENGAR, ending on their clash.
 // No text in the battle itself. Any button skips (the first press
 // while the browser still has sound locked just turns the sound on).
@@ -14,15 +14,6 @@
   // ---------- sprites (all drawn pixel by pixel, cached per pose) ----------
   const cache = {};
   function cached(k, f) { return cache[k] || (cache[k] = f()); }
-  // alpha 0-9 mask → ivory on navy, one antialias step
-  function maskSurface(rows) {
-    const w = rows[0].length, h = rows.length, s = new Surface(w, h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const a = +rows[y][x];
-      if (a >= 6) s.data[y * w + x] = IVORY; else if (a >= 3) s.data[y * w + x] = mix(NAVY, IVORY, 0.5);
-    }
-    return s;
-  }
   // 1px outline around filled pixels, then a bevel: lit up-left edges, shaded down-right ones
   function finish(s, line, lite, dark) {
     const w = s.w, h = s.h, d = s.data, src = d.slice();
@@ -124,7 +115,7 @@
       if (this.t < PRESENTS) this.drawPresents(s, this.t); else this.drawBattle(s, this.t - PRESENTS);
     }
 
-    // ----- LEVY ST. GAMES presents -----
+    // ----- TnJ presents -----
     drawPresents(s, t) {
       const LAND = 62, fadeOut = Math.max(0, (t - (PRESENTS - 24)) / 24);
       const bgK = ease((t - LAND) / 30);
@@ -136,11 +127,11 @@
       }
       // the shooting star: in from the top right, trailing sparks, landing where the mark will be
       const k = Math.min(1, Math.max(0, (t - 12) / (LAND - 12)));
-      const sx = lerp(360, 160, ease(k)), sy = lerp(-20, 58, ease(k));
+      const sx = lerp(360, 160, ease(k)), sy = lerp(-20, 66, ease(k));
       if (t >= 12 && t < LAND) {
         for (let i = 0; i < 26; i++) {
           const kk = Math.max(0, k - i * 0.012);
-          const tx = lerp(360, 160, ease(kk)), ty = lerp(-20, 58, ease(kk));
+          const tx = lerp(360, 160, ease(kk)), ty = lerp(-20, 66, ease(kk));
           s.pblend(tx, ty, i < 4 ? WHITE : i % 3 ? IVORY : ORANGE, 1 - i / 26);
         }
         sparkle(s, sx, sy, 3, WHITE);
@@ -148,20 +139,14 @@
       }
       for (const p of this.parts) if (p.life > 0) s.pblend(p.x, p.y, p.c, Math.min(1, p.life / 14));
       // impact ring
-      if (t >= LAND && t < LAND + 18) { const r = (t - LAND) * 3; s.circle(160, 58, r, mix(NAVY, WHITE, 1 - (t - LAND) / 18)); }
-      const L = G.LEVY_LOGO;
-      if (L && t >= LAND) {
-        const mark = cached('levy_mark', () => maskSurface(L.mark)), word = cached('levy_word', () => maskSurface(L.word));
-        // the round mark blooms out of the landing star
-        const g = ease((t - LAND) / 14), mw = Math.max(1, Math.round(mark.w * g)), mh = Math.max(1, Math.round(mark.h * g));
-        s.blitScaled(mark, 160 - (mw >> 1), 58 - (mh >> 1), mw, mh);
-        // the wordmark wipes in beneath, then GAMES and "presents"
-        const wipe = Math.round(word.w * ease((t - LAND - 16) / 26));
-        if (wipe > 0) s.blit(word, 160 - (word.w >> 1), 84, { sw: wipe });
-        const spaced = 'G  A  M  E  S', gk = ease((t - LAND - 44) / 18);
-        if (gk > 0) F.drawSmall(s, spaced, 160 - (F.measureSmall(spaced) >> 1), 117, mix(NAVY, IVORY, gk * 0.85));
+      if (t >= LAND && t < LAND + 18) { const r = (t - LAND) * 3; s.circle(160, 66, r, mix(NAVY, WHITE, 1 - (t - LAND) / 18)); }
+      if (t >= LAND) {
+        const tnj = cached('tnj', () => { const sf = new Surface(120, 60); G.logoText(sf, 'TnJ', 60, 6, 4, '#fff6e0', '#d97757', '#141a2e', '#0a0e1a'); return sf; });
+        // the name blooms out of the landing star, then "presents"
+        const g = ease((t - LAND) / 16), mw = Math.max(1, Math.round(tnj.w * g)), mh = Math.max(1, Math.round(tnj.h * g));
+        s.blitScaled(tnj, 160 - (mw >> 1), 66 - (mh >> 1), mw, mh);
         const pk = ease((t - LAND - 70) / 20);
-        if (pk > 0) F.draw(s, 'presents', 160 - (F.measure('presents') >> 1), 128, mix(NAVY, IVORY, pk));
+        if (pk > 0) F.draw(s, 'presents', 160 - (F.measure('presents') >> 1), 112, mix(NAVY, IVORY, pk));
         const vk = ease((t - LAND - 110) / 24), vibe = 'VIBE CODED WITH CLAUDE OPUS 5.5';
         if (vk > 0) {
           const vw = F.measureSmall(vibe), vx = 160 - (vw >> 1) + 5;
@@ -169,8 +154,8 @@
           const spark = claudeSprite(4, 0, 'eyes');
           s.blit(spark, vx - 12, 161, { alpha: vk });
         }
-        // a few glints around the mark
-        for (let i = 0; i < 3; i++) { const ph = (t + i * 37) % 90; if (ph < 16) sparkle(s, 160 + [-26, 24, 18][i], 58 + [-16, -12, 18][i], ph < 8 ? 2 : 1, IVORY); }
+        // a few glints around the name
+        for (let i = 0; i < 3; i++) { const ph = (t + i * 37) % 90; if (ph < 16) sparkle(s, 160 + [-44, 42, 30][i], 66 + [-18, -14, 20][i], ph < 8 ? 2 : 1, IVORY); }
       }
       if (!this.noHints && !this.wasOn && !this.soundAsked && t > 20) F.drawSmall(s, (G.touchUI ? 'TAP FOR SOUND' : 'PRESS ANY KEY FOR SOUND'), 320 - F.measureSmall((G.touchUI ? 'TAP FOR SOUND' : 'PRESS ANY KEY FOR SOUND')) - 6, 8, hex('#5a6280'));
       if (fadeOut > 0) for (let i = 0; i < s.data.length; i++) s.data[i] = mix(s.data[i], BLACK, fadeOut);

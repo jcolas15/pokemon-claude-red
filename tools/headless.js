@@ -20,7 +20,7 @@ function loadGame(opts) {
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   const html = fs.readFileSync(path.join(ROOT, process.env.PKHTML || 'index.html'), 'utf8');
-  const srcs = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+  const srcs = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]).filter(s => !/^https?:/.test(s)); // the CDN supabase-js is browser-only
   for (const s of srcs) vm.runInContext(fs.readFileSync(path.join(ROOT, s), 'utf8'), ctx, { filename: s });
   return ctx;
 }

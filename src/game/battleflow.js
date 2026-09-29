@@ -236,7 +236,7 @@
   G.blackout = blackout;
 
   G.startWildBattle = function* (species, level, opts) {
-    const m = new G.Mon(species, level, { ot: 'WILD' });
+    const m = (opts && opts.enemyMon) || new G.Mon(species, level, { ot: 'WILD' });
     return yield* runBattle(Object.assign({ type: 'wild', enemyParty: [m] }, opts || {}));
   };
 
@@ -290,6 +290,13 @@
       if (!table || !table.rate || !table.mons.length) return false;
       if (G.noEncounters) return false;
       if (rnd(256) >= table.rate) return false;
+      const roamer = table === w.grass && G.roamers && G.roamers.encounter(map.name);
+      if (roamer) {
+        const lead = S.party.find(m => m.hp > 0);
+        if (S.repel > 0 && lead && roamer.mon.level < lead.level) return false;
+        G.spawnScript(G.roamers.battle(roamer), 'wild');
+        return true;
+      }
       let r = rnd(256), slot = 0;
       for (let i = 0; i < G.DATA.slotChances.length; i++) { r -= G.DATA.slotChances[i]; if (r < 0) { slot = i; break; } }
       const [lv, sp] = table.mons[slot];

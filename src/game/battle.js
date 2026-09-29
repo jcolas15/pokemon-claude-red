@@ -5,8 +5,8 @@
   const rnd = n => Math.floor(Math.random() * n);
   const chance = p => Math.random() < p;
   const STAGE = [25, 28, 33, 40, 50, 66, 100, 150, 200, 250, 300, 350, 400];
-  const PHYSICAL = new Set(['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'BIRD']);
-  const HIGH_CRIT = new Set(['KARATE_CHOP', 'RAZOR_LEAF', 'CRABHAMMER', 'SLASH']);
+  const PHYSICAL = new Set(['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'BIRD', 'STEEL']);
+  const HIGH_CRIT = new Set(['KARATE_CHOP', 'RAZOR_LEAF', 'CRABHAMMER', 'SLASH', 'CROSS_CHOP', 'AEROBLAST']);
   const STAT_NAME = { atk: 'ATTACK', def: 'DEFENSE', spd: 'SPEED', spc: 'SPECIAL', acc: 'accuracy', eva: 'evade' };
   const TYPE_NAME = t => t === 'PSYCHIC_TYPE' ? 'PSYCHIC' : t;
 
@@ -67,6 +67,7 @@
           if (r) return this.finish('run');
           const eAct = this.o.p2Action ? (yield* this.o.p2Action(this)) : this.enemyAction();
           yield* this.doMove(this.e, eAct.move);
+          if (this.result) return this.result;
           if (yield* this.checkFaints()) { if (this.result) return this.result; }
           continue;
         }
@@ -225,6 +226,8 @@
         yield* ui.statusAnim(side, 'PAR');
         yield* ui.msg(name + "'s fully paralyzed!"); return;
       }
+      // a roaming legendary runs the moment it gets to act (src/game/roamers.js)
+      if (this.o.roamer && !side.isPlayer) { yield* ui.msg(name + ' fled!'); if (ui.flee) yield* ui.flee(side); this.result = 'fled'; return; }
       let md = D().moves[moveId] || D().moves.STRUGGLE;
       // PP use (not for continuing multi-turn moves)
       const continuing = (v.charging === moveId) || (v.thrash && v.thrash.started) || (v.bide && v.bide.started) || (v.trapping && v.trapping.started) || (v.rage && moveId === 'RAGE' && v.rageStarted);
