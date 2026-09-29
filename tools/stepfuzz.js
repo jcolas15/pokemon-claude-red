@@ -7,7 +7,7 @@ const errs = []; console.error = (...a) => errs.push(a.map(x => (x && x.stack) ?
 const filter = new RegExp(process.argv[2] || '.');
 const PROFILES = +(process.argv[3] || 6), PER = +(process.argv[4] || 4);
 let seed = 12345; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-function party() { const m = new G.Mon('MEWTWO', 100); m.moves = []; ['PSYCHIC_M', 'THUNDERBOLT', 'ICE_BEAM', 'FLAMETHROWER'].forEach(x => m.addMove(x)); G.state.party = [m, new G.Mon('DRAGONITE', 100)]; }
+function party() { const m = new G.Mon('MEWTWO', 100); m.moves = []; ['SURF', 'PSYCHIC_M', 'THUNDERBOLT', 'ICE_BEAM'].forEach(x => m.addMove(x)); G.state.party = [m, new G.Mon('DRAGONITE', 100)]; }
 const ITEMS = ['POKE_BALL', 'POTION', 'FRESH_WATER', 'SODA_POP', 'LEMONADE', 'POKE_DOLL', 'S_S_TICKET', 'SILPH_SCOPE', 'POKE_FLUTE', 'CARD_KEY', 'LIFT_KEY', 'SECRET_KEY', 'COIN_CASE', 'GOLD_TEETH', 'BICYCLE', 'OAKS_PARCEL', 'POKEDEX'];
 const BADGES = ['BOULDERBADGE', 'CASCADEBADGE', 'THUNDERBADGE', 'RAINBOWBADGE', 'SOULBADGE', 'MARSHBADGE', 'VOLCANOBADGE', 'EARTHBADGE'];
 function applyProfile(flags, p) {

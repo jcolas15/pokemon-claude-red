@@ -6,3 +6,6 @@ __pycache__/
 # build output and the local site database (tools/build_dist.js, tools/serve.py)
 dist/
 /data/
+
+# local reference checkouts (pokecrystal for tools/convert_gen2.js)
+vendor/

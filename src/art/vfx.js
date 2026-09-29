@@ -365,7 +365,8 @@
     // Gen 2 attacks (src/data/gen2_core.js) reuse the closest Gen 1 animation
     AEROBLAST: ['wind'], FAINT_ATTACK: ['quick'], SLUDGE_BOMB: ['poison'], ZAP_CANNON: ['thunder'], GIGA_DRAIN: ['drain'], STEEL_WING: ['wing'],
     SACRED_FIRE: ['fireblast'], MEGAHORN: ['needles', 3], PURSUIT: ['hit'], IRON_TAIL: ['bighit'], METAL_CLAW: ['claw'], CROSS_CHOP: ['cut'],
-    TWISTER: ['wind'], CRUNCH: ['bite'], SHADOW_BALL: ['nightshade'],
+    TWISTER: ['wind'], CRUNCH: ['bite'], SHADOW_BALL: ['nightshade'], FLAME_WHEEL: ['firespin'], POWDER_SNOW: ['icebeam'],
+    OCTAZOOKA: ['bubble'], SPARK: ['thundershock'], ANCIENTPOWER: ['rocks', 3],
   };
 
   function* move(sc, id, k, hit) {

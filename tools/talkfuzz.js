@@ -11,7 +11,7 @@ G.noEncounters = true; G.autoBattleText = true; G.state.options.battleAnim = fal
 const errs = []; const origErr = console.error;
 console.error = (...a) => errs.push(a.map(x => (x && x.stack) ? x.stack.split('\n').slice(0, 3).join(' | ') : String(x)).join(' ').slice(0, 400));
 function strongParty() {
-  const m = new G.Mon('MEWTWO', 100); m.moves = []; ['PSYCHIC_M', 'RECOVER', 'THUNDERBOLT', 'ICE_BEAM'].forEach(x => m.addMove(x));
+  const m = new G.Mon('MEWTWO', 100); m.moves = []; ['SURF', 'PSYCHIC_M', 'RECOVER', 'ICE_BEAM'].forEach(x => m.addMove(x));
   G.state.party = [m, new G.Mon('DRAGONITE', 100)];
 }
 function resetState() {

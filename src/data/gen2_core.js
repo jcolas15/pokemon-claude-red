@@ -15,13 +15,18 @@
     ['STEEL', 'FIRE', H], ['STEEL', 'WATER', H], ['STEEL', 'ELECTRIC', H], ['STEEL', 'ICE', 2], ['STEEL', 'ROCK', 2], ['STEEL', 'STEEL', H]);
 
   // [id, Gen 2 index, name, Gen 1 effect, power, type, accuracy, pp]; stats from pokecrystal data/moves/moves.asm.
-  // Gen 1 has no "raise your own stat" side effect, so STEEL WING and METAL CLAW are plain hits.
+  // Gen 1 has no "raise your own stat" or "lower accuracy" side effect, so STEEL WING, METAL CLAW, ANCIENTPOWER and
+  // OCTAZOOKA are plain hits.
   const MOVES = [
+    ['FLAME_WHEEL', 172, 'FLAME WHEEL', 'BURN_SIDE1', 60, 'FIRE', 100, 25],
     ['AEROBLAST', 177, 'AEROBLAST', 'NO_ADDITIONAL', 100, 'FLYING', 95, 5],
+    ['POWDER_SNOW', 181, 'POWDER SNOW', 'FREEZE_SIDE1', 40, 'ICE', 100, 25],
     ['FAINT_ATTACK', 185, 'FAINT ATTACK', 'SWIFT', 60, 'DARK', 100, 20],
     ['SLUDGE_BOMB', 188, 'SLUDGE BOMB', 'POISON_SIDE2', 90, 'POISON', 100, 10],
+    ['OCTAZOOKA', 190, 'OCTAZOOKA', 'NO_ADDITIONAL', 65, 'WATER', 85, 10],
     ['ZAP_CANNON', 192, 'ZAP CANNON', 'PARALYZE_SIDE2', 100, 'ELECTRIC', 50, 5],
     ['GIGA_DRAIN', 202, 'GIGA DRAIN', 'DRAIN_HP', 60, 'GRASS', 100, 5],
+    ['SPARK', 209, 'SPARK', 'PARALYZE_SIDE2', 65, 'ELECTRIC', 100, 20],
     ['STEEL_WING', 211, 'STEEL WING', 'NO_ADDITIONAL', 70, 'STEEL', 90, 25],
     ['SACRED_FIRE', 221, 'SACRED FIRE', 'BURN_SIDE2', 100, 'FIRE', 95, 5],
     ['MEGAHORN', 224, 'MEGAHORN', 'NO_ADDITIONAL', 120, 'BUG', 85, 10],
@@ -31,6 +36,7 @@
     ['CROSS_CHOP', 238, 'CROSS CHOP', 'NO_ADDITIONAL', 100, 'FIGHTING', 80, 5],
     ['TWISTER', 239, 'TWISTER', 'FLINCH_SIDE1', 40, 'DRAGON', 100, 20],
     ['CRUNCH', 242, 'CRUNCH', 'SPECIAL_DOWN_SIDE', 80, 'DARK', 100, 15],
+    ['ANCIENTPOWER', 246, 'ANCIENTPOWER', 'NO_ADDITIONAL', 60, 'ROCK', 100, 5],
     ['SHADOW_BALL', 247, 'SHADOW BALL', 'SPECIAL_DOWN_SIDE', 80, 'GHOST', 100, 15],
   ];
   for (const [id, num, name, effect, power, type, acc, pp] of MOVES) {
