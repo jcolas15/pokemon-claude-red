@@ -11,10 +11,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "vendor/**",
-    // the plain-JS engine and its Node tools are linted as they move to TypeScript (Step 2)
-    "src/engine/**/*.js",
+    // engine files still marked @ts-nocheck are linted once they're typed: un-ignore each one here as it lands
+    // (docs/nextjs-migration.md). core/audio.js stays plain JS.
+    "src/engine/**/*.{ts,js}",
+    "!src/engine/{entry,engine,platform,global}.ts",
+    "!src/engine/core/{gfx,font,input,engine}.ts",
+    "!src/engine/art/{palette,logo,mondef}.ts",
+    "!src/engine/data/mons/152-*.ts",
+    "!src/engine/data/mons/1[89]*.ts",
+    "!src/engine/data/mons/2*.ts",
     "tools/**",
-    "dist/**",
   ]),
 ]);
 

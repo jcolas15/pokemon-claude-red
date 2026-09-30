@@ -123,7 +123,7 @@ The regression fuzzers match the original build.
 Verified: the converter's lint (starting moves, an attack by Lv 10, types, evolutions, dex order) passes for all 100;
 every species builds at Lv 1–100; all item, level and stat evolutions work; Gen 2 parties save, load and pass import
 validation; 80 Gen 2-only battles and the fuzzers run clean. The six Gen 2 legendaries are excluded from the Battle Tower.
-Until Phase 3, Gen 2 species use the game's generic placeholder sprite.
+Gen 2 species used the game's generic placeholder sprite until Phase 3 drew them (now done).
 
 1. **`tools/convert_gen2.js`**, reading from a local pokecrystal checkout:
    - `data/pokemon/base_stats/*.asm`: base stats, types, catch rate, base exp and growth rate. Special comes from
@@ -146,7 +146,12 @@ Until Phase 3, Gen 2 species use the game's generic placeholder sprite.
 5. **Verify:** the converter's lint passes, every species has a valid learnset, evolutions and dex data, and
    `fuzzbattle.js` runs with Gen 2 species added to its pool.
 
-## Phase 3: art (the long pole; runs in parallel from Phase 1 on)
+## Phase 3: art — done
+
+All 100 are drawn in `src/engine/data/mons/152-181.ts`, `182-211.ts`, `212-241.ts` and `242-251.ts` (typed via
+`art/mondef.ts`), reviewed with `tools/monsheet.js`. Every species in the 251 Pokédex has art, so the quiz draws from all
+251. Will and Karen's portraits landed with Phase 5. The original plan follows.
+
 
 - 100 sprite definitions in the `src/engine/art/pokesprite.js` primitive format, in four batch files. Back views are generated
   automatically.
@@ -302,12 +307,25 @@ legendary on share cards.
 
 **Verify:** the Pokédex scrolls to #251, share cards render with new counts, and an old save imports and loads.
 
-## Phase 7: balance and playtest
+## Phase 7: balance and playtest — done
 
-- A full playthrough on a fresh save, checking that no Gen 2 Pokémon trivializes an early gym.
-- Watch Steel's many resistances in Gen 1 metagame terms (Skarmory, Steelix, Forretress).
-- Watch Dark's immunity to Psychic, a big shift in a Psychic-dominated Gen 1.
-- Run all fuzzers: `fuzzbattle`, `talkfuzz`, `stepfuzz`, `warpcheck`.
+Measured headlessly with `node tools/gymsim.js`: every gym leader, Elite Four member and rival fight, played by a greedy
+no-items player with a typical Gen 1 team for each starter, against the Gen 1-only ("vanilla") version of the trainer and
+with the likely game-changing Gen 2 catches swapped in.
+- **Brock** was the one real problem: Sudowoodo's STAB Rock Throw took a Charmander start from winning 97% of the time
+  to 3%. It is now level 10 with Low Kick, Mimic, Double Team and Screech (Charmander 50% with a weak team, 90%+ at
+  typical levels). No other gym addition changes things that much.
+- **No Gen 2 catch trivializes an early gym.** Quagsire before Lt. Surge adds nothing Diglett didn't; Grass and Electric
+  catches before Misty are weaker than Oddish.
+- **Dark vs Sabrina:** Umbreon or Houndoom lift her from about 40% to 98%, but the player still loses about 2.5 of
+  4 Pokémon. Kept on purpose (owner's call): Dark is meant to be the Psychic answer, and Umbreon costs the same as
+  Jolteon (Eevee plus a stone). Coverage moves on her team didn't help, because the Gen 1-style AI rarely picks them.
+- **Steel:** no Elite Four or gym is broken by Steelix, Skarmory or Forretress (the largest gain is Lance, from 43% to 54%).
+- **Rival:** the extra Gen 2 Pokémon makes his Cerulean to Lavender fights clearly harder (for example, S.S. Anne drops
+  from 64% to 28% for this team). Kept on purpose (owner's call).
+- **Fuzzers:** `fuzzbattle`, `talkfuzz`, `stepfuzz` and `warpcheck` give the same results as the last commit. The few
+  stuck cases they report (3 Celadon/Cerulean NPC dialogues, a Pokémon Tower 6F battle, the Silph Co. 11F warp to
+  Saffron) were already there before this work.
 
 ## Order and dependencies
 

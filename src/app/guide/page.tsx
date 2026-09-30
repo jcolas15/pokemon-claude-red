@@ -123,7 +123,7 @@ export default function Guide() {
               <li>Optional: Route 22 (west of Viridian) has your rival (Lv 8–9), Nidoran♂/♀, and <b>Mareep</b>.</li>
               <li>Go north through <b>Viridian Forest</b>: mostly Weedle and Kakuna, plus <b>Ledyba</b> and <b>Spinarak</b>, and Pikachu, Caterpie and Metapod at 5% each.</li>
               <li>In Pewter, the gentleman in the Pokémon Center gives you an <b>Igglybuff</b>.</li>
-              <li><b>Brock</b> (Rock) now fields a Sudowoodo too. Water, Grass and Fighting all work.</li>
+              <li><b>Brock</b> (Rock) now fields a Sudowoodo too. Its Low Kick is his only real attack, and its high Defense shrugs off Ember, so a Charmander start wants a second POKéMON around level 13. Water, Grass and Fighting all work.</li>
             </Chapter>
             <Chapter n="02" heading="Mt. Moon to Cerulean City" lv="Lv 20–22">
               <li>Route 3 adds <b>Hoppip</b> and <b>Mareep</b>. In the Pokémon Center at Mt. Moon, the gentleman gives you a <b>Cleffa</b>, and a salesman sells a Magikarp for $500.</li>
@@ -230,7 +230,7 @@ export default function Guide() {
           </div>
         </Section>
 
-        <Section id="gen2" kicker="Johto comes to Kanto" heading="The Gen 2 additions" intro="All 100 Gen 2 POKéMON are in, under Gen 1 rules, and the Pokédex runs to #251. Until their drawings land, Gen 2 POKéMON show a placeholder.">
+        <Section id="gen2" kicker="Johto comes to Kanto" heading="The Gen 2 additions" intro="All 100 Gen 2 POKéMON are in, under Gen 1 rules, and the Pokédex runs to #251. Every one of them has its own drawing, front and back.">
           <div className={s.grid2}>
             <div className={s.panel}>
               <h3>Gifts</h3>
@@ -344,7 +344,7 @@ export default function Guide() {
                 <li><b>Local versus:</b> 2 players on one device.</li>
               </ul>
             </div>
-            <div className={s.panel}><h3>Who&apos;s That POKéMON?</h3><p>On the title screen: name the silhouette before time runs out. <b>DAILY</b> gives everyone the same 10; <b>ENDLESS</b> runs until you miss. Gen 2 POKéMON join the quiz as their drawings are added.</p></div>
+            <div className={s.panel}><h3>Who&apos;s That POKéMON?</h3><p>On the title screen: name the silhouette before time runs out. <b>DAILY</b> gives everyone the same 10; <b>ENDLESS</b> runs until you miss. All 251 POKéMON are in the pool.</p></div>
             <div className={s.panel}><h3>Completing the Pokédex</h3><p>The Pokédex holds <b>251</b>. PROF. OAK rates your progress at any PC all the way up, and the game designer in <b>Celadon Mansion 3F</b> awards the diploma once you own every POKéMON except Mew and Celebi. Milestone share cards now run to 251.</p></div>
             <div className={s.panel}><h3>Share and customize</h3><p>A new game lets you design your trainer&apos;s look. <b>SHARE</b> in the START menu makes cards for badges, catches and Pokédex milestones.</p></div>
           </div>

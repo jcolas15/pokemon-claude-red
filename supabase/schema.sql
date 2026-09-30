@@ -41,7 +41,7 @@ create or replace function public.handle_new_player() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
   insert into public.players (id, email, approved)
-  values (new.id, coalesce(new.email, ''), lower(coalesce(new.email, '')) = 'jon.colas@swarmingtech.com')
+  values (new.id, coalesce(new.email, ''), lower(coalesce(new.email, '')) = 'colasj08@gmail.com')
   on conflict (id) do nothing;
   return new;
 end $$;
@@ -70,5 +70,5 @@ grant execute on function public.put_save(jsonb, timestamptz, boolean) to authen
 
 -- if you signed in before running this file, backfill and approve yourself
 insert into public.players (id, email, approved)
-select id, coalesce(email, ''), lower(coalesce(email, '')) = 'jon.colas@swarmingtech.com' from auth.users
+select id, coalesce(email, ''), lower(coalesce(email, '')) = 'colasj08@gmail.com' from auth.users
 on conflict (id) do nothing;

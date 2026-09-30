@@ -100,7 +100,7 @@ Progress saves to the browser. With Supabase set up, every SAVE also keeps a cop
   - Buildings are painted as whole objects with roofs, windows, doors and shadows.
   - There's a day/night cycle with lit windows, fireflies and flickering torches.
   - Every one of the 165 moves has its own animation.
-- **151 Pokémon from shapes.** A small drawing language (ellipses, polygons, spots, stripes, eyes) is rasterised into
+- **251 Pokémon from shapes.** A small drawing language (ellipses, polygons, spots, stripes, eyes) is rasterised into
   outlined, shaded pixel art, and back sprites and party icons are derived from the same description.
 - **The original music, re-voiced.** The note data of all 52 songs is converted from the disassembly. A sequencer that
   keeps the Game Boy's exact frame timing plays it through new Web Audio instruments: chorused pulse leads, a wave
@@ -153,9 +153,9 @@ tools/                     data converters, headless runner, fuzzers, guide data
 docs/                      how maps, sprites, dialogue and story scripts are authored; the Gen 2 and Next.js plans
 ```
 
-The engine is plain JavaScript: each file adds to a global `G`, and `src/engine/entry.ts` imports them in order. The
-Next.js page mounts the canvas and imports the engine in the browser. The engine files move to TypeScript modules one
-at a time (see `docs/nextjs-migration.md`).
+The engine is TypeScript modules sharing a global `G`, imported in order by `src/engine/engine.ts`. The Next.js page
+mounts the canvas and imports the engine in the browser. Most engine files still carry `// @ts-nocheck` and gain
+types one at a time (see `docs/nextjs-migration.md`).
 
 ### Rebuilding the data
 

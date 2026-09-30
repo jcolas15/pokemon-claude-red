@@ -18,17 +18,34 @@ imported after the load event).
 
 ## Step 2: engine files to TypeScript (in progress)
 
-### Recipe for one file
+### Where it stands
 
-1. `git mv foo.js foo.ts` so history follows the file.
-2. Replace the `(function (G) { ... })(window.G)` wrapper with a module: typed functions and classes as named exports.
-3. Keep publishing the same object on the global, e.g. `game().gfx = { ... }` (`src/engine/global.ts`), so the
-   files not yet converted keep working. Remove that line once nothing reads it.
-4. In `src/engine/engine.ts`, change the import to the extensionless path (`import './core/gfx';`).
-5. Verify, in this order: `pnpm exec tsc --noEmit`, `pnpm lint`, the headless tests, a pixel comparison against the
-   previous commit for anything that draws, and `pnpm build`.
+Every engine file is a TypeScript ES module except `core/audio.js`, which stays plain JavaScript on purpose (sound is
+low priority for this build). Files come in two kinds:
 
-### Done
+- **Typed** (strict, linted): `global`, `platform`, `engine`, `entry`, `core/gfx`, `core/font`, `core/input`,
+  `core/engine`, `art/palette`, `art/logo`.
+- **Legacy** (everything else): moved into modules by a one-off conversion that removed the old
+  `(function (G) { ... })(window.G)` wrappers. They start with `// @ts-nocheck`, read and publish through
+  `const G = game()`, and are skipped by ESLint. `eslint.config.mjs` lists the typed files explicitly, so that list is
+  the progress tracker. The generated data files (`maps`, `music`, `pokedata`, `gen2`) come out of the converters in
+  this same form.
+
+Verified after the conversion: pixel-identical reference scenes, identical fuzzer results, every Gen 2 phase test, a
+clean type-check (about 2 s), lint and build.
+
+### Typing a legacy file
+
+1. Remove `// @ts-nocheck` and add types until `pnpm exec tsc --noEmit` is clean. Prefer importing typed modules
+   (`import { Surface } from '../core/gfx'`) over reading them from `G`.
+2. Hooks the file reads from `G` that aren't typed yet go into the `GameGlobal` interface in `src/engine/global.ts`.
+3. Add the file to the un-ignore list in `eslint.config.mjs` and make `pnpm lint` clean.
+4. Verify: type-check, lint, the headless tests, a pixel comparison against the previous commit for anything that
+   draws, and `pnpm build`.
+
+Once no file reads a given part of `G`, stop publishing it there.
+
+### Typed so far
 
 | File | Notes |
 |---|---|
@@ -39,16 +56,8 @@ imported after the load event).
 | `art/palette.ts` | `PAL`, `Ramp`, `NoiseTex`, `noise`, `rand` exported; still `G.PAL` / `G.noise` / `G.rand` |
 | `art/logo.ts` | `titleLogo()` exported; still `G.titleLogo` |
 
-### Order for the rest
+### Suggested order for typing the rest
 
-Leaves first, so each converted file can import typed modules instead of reading `G`:
-
-1. `core/` — done except `audio.js`, which stays plain JavaScript on purpose: sound is low priority for this build,
-   and it works unchanged through the `G.audio` / `G.sfx` globals
-2. `art/` — `palette` and `logo` done; the other 11 renderers next (they also read `G.CAST`, `G.DATA` and each other)
-3. `game/` — in dependency order: `map`, `maprender`, `ui`, `pokemon`, `battle`, then the screens
-4. `scripts/` — story scripts last; they read the most of `G`
-5. `data/` — generated files: switch the converters (`tools/convert_*.js`) to emit typed modules
-
-Files that read other parts of `G` go through the `GameGlobal` interface in `src/engine/global.ts`: add a typed
-entry there for each hook a converted module reads, instead of casting at every call site.
+Leaves first: `art/` renderers, then `game/` in dependency order (`map`, `maprender`, `ui`, `pokemon`, `battle`, then
+the screens), then the story `scripts/`. For generated data, give the converters typed output with a schema (species,
+moves, maps) instead of `@ts-nocheck`.
