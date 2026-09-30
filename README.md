@@ -65,20 +65,16 @@ Everything in this repository grew from that sentence, followed by a few days of
 
 Play it in your browser at **[claudered.dev](https://claudered.dev)**, on a computer or a phone.
 
-To run it yourself, there's no install and no build step. Clone the repo and open `index.html` in a browser.
+To run it yourself you need Node 20+ and pnpm. It's a Next.js app:
 
 ```sh
-git clone https://github.com/levy-street/pokemon-claude-red.git
-cd pokemon-claude-red
-open index.html            # or double-click it
+pnpm install
+pnpm dev          # http://localhost:8784  (the game at /, the strategy guide at /guide)
+pnpm dev:lan      # the same, reachable from a phone on your Wi-Fi at http://<your Mac's IP>:8784
 ```
 
-With `src/config.js` left empty, the game saves to the browser only, with no sign-in. Filling it in turns on Google
-sign-in and cloud saves (see [Hosting](#hosting)); the page then has to be served over http rather than opened as a file:
-
-```sh
-python3 -m http.server 8784   # http://localhost:8784
-```
+With no Supabase settings the game saves to the browser only, with no sign-in. Setting them turns on Google sign-in
+and cloud saves (see [Hosting](#hosting)).
 
 ### Controls
 
@@ -145,17 +141,21 @@ Lv 132 Mewtwo. Meeting MissingNo. adds 128 to the sixth item in your bag.
 ## How it's built
 
 ```
-index.html          the page: canvas, phone controller, sign-in gate, script list
-src/core/           framebuffer + drawing primitives, pixel font, input, main loop, audio synth + GB sequencer
-src/art/            procedural renderers: terrain, buildings, interiors, characters, Pokémon, battle scenes, VFX
-src/data/           maps, species, moves, trainers, music (converted from pokered), dialogue, Pokémon shape files
-src/game/           overworld, battles, menus, PC, bag, Pokédex, Social Zone, sharing, cloud saves, glitches
-src/scripts/        the story, map by map, following Red's event scripts
-tools/              data converters, headless runner, fuzzers, map/sprite/VFX sheet renderers, the site server
-docs/               how maps, sprites, dialogue and story scripts are authored
+src/app/                   Next.js routes: the game page (/) and the strategy guide (/guide)
+src/components/game/       the page around the canvas: controller, sign-in gate (React), game.css
+src/engine/entry.ts        the engine's load order; platform.ts sets up the global G, env config and Supabase
+src/engine/core/           framebuffer + drawing primitives, pixel font, input, main loop, audio synth + GB sequencer
+src/engine/art/            procedural renderers: terrain, buildings, interiors, characters, Pokémon, battle scenes, VFX
+src/engine/data/           maps, species, moves, trainers, music (converted from pokered and pokecrystal), dialogue, Pokémon shape files
+src/engine/game/           overworld, battles, menus, PC, bag, Pokédex, Social Zone, sharing, cloud saves, roaming, glitches
+src/engine/scripts/        the story, map by map, following Red's event scripts, plus the Gen 2 gifts and legendaries
+tools/                     data converters, headless runner, fuzzers, guide data, map/sprite/VFX sheet renderers
+docs/                      how maps, sprites, dialogue and story scripts are authored; the Gen 2 and Next.js plans
 ```
 
-It's plain JavaScript loaded with classic `<script>` tags. There are no frameworks and no bundler, and it runs from `file://`.
+The engine is plain JavaScript: each file adds to a global `G`, and `src/engine/entry.ts` imports them in order. The
+Next.js page mounts the canvas and imports the engine in the browser. The engine files move to TypeScript modules one
+at a time (see `docs/nextjs-migration.md`).
 
 ### Rebuilding the data
 
@@ -184,8 +184,9 @@ drivers are built on top of it:
 
 ### Hosting
 
-`node tools/build_dist.js https://your.site/` writes a static `dist/` (plus a `preview.png` for link previews) that any
-web host can serve. Set `CF_BEACON_TOKEN=<site token>` to include Cloudflare Web Analytics, which is cookieless.
+Deploy to Vercel as a standard Next.js project (framework preset *Next.js*, `pnpm build`). The build generates the
+guide's data from the game (`tools/guide-data.js`). `pnpm preview:image` re-renders `public/preview.png`, the
+link-preview image.
 
 #### Sign-in and cloud saves (Supabase)
 
@@ -199,12 +200,11 @@ row-level security keeps each save readable and writable by its owner only. A sa
    Authentication > Sign In / Providers > Google.
 3. In Supabase under Authentication > URL Configuration, set the Site URL to your Vercel URL and add it (plus
    `http://localhost:8784/` for local testing) to the redirect URLs.
-4. Put the project URL and anon key (Project Settings > API) in `src/config.js`.
+4. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings > API) in Vercel's environment
+   variables, and in `.env.local` for local development (see `.env.example`).
 5. To let someone in, open Table Editor > `players` and set their `approved` to `true`. Until then they see
    "Waiting for the owner to approve you".
 
-On Vercel, import the repo with framework preset *Other*, no build command and the repo root as the output directory.
-You can also deploy the `dist/` folder that `node tools/build_dist.js` writes.
 
 ## Credits
 

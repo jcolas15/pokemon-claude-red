@@ -1,9 +1,9 @@
-// Converts map layout/event data from the pokered disassembly into src/data/maps.js.
+// Converts map layout/event data from the pokered disassembly into src/engine/data/maps.js.
 // Only structural data is extracted (layouts, collision ids, warps, objects); no graphics.
 'use strict';
 const fs = require('fs'), path = require('path');
 const P = process.argv[2] || path.join(process.env.POKERED || '', '');
-const OUT = path.join(__dirname, '..', 'src', 'data');
+const OUT = path.join(__dirname, '..', 'src', 'engine', 'data');
 const rd = f => fs.readFileSync(path.join(P, f), 'utf8');
 const rdb = f => fs.readFileSync(path.join(P, f));
 const num = s => { s = String(s).trim(); if (s.startsWith('$')) return parseInt(s.slice(1), 16); return parseInt(s, 10); };

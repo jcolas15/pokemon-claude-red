@@ -15,8 +15,8 @@ are scripted in `src/scripts/` so the game plays exactly like Red.
   To see a label's original wording, build a reference with `node tools/extract_text.js $POKERED text_ref.json` (keep it out of the repo).
 
 ## Where to write
-Map scripts live in `src/scripts/` (each file is included by index.html). Keep engine changes (`src/core`,
-`src/game`) small and separate from story work. Features a map needs (a minigame, a special screen) can live in
+Map scripts live in `src/engine/scripts/` (each file is imported in order by `src/engine/engine.ts`). Keep engine changes (`src/engine/core`,
+`src/engine/game`) small and separate from story work. Features a map needs (a minigame, a special screen) can live in
 its script file as new `G.*` functions.
 
 ## Reference implementation

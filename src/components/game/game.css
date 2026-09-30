@@ -1,0 +1,47 @@
+/* The game page: canvas, on-screen controller, sign-in gate. Loaded only by the game route. */
+html, body { margin: 0; height: 100%; background: #0d0c16; overflow: hidden; }
+body { display: flex; align-items: center; justify-content: center; }
+#disclaimer { position: fixed; left: 0; right: 0; bottom: 2px; margin: 0; text-align: center; font: 10px/1.2 system-ui, sans-serif; color: #6a6488; pointer-events: none; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+/* touch screens: 16px text stops iOS zooming into fields; bigger targets for thumbs */
+html.touch body { touch-action: manipulation; }
+html.touch #disclaimer { z-index: 6; font-size: 8px; line-height: 1.3; padding: 0 14px; }
+
+/* on-screen controller (src/engine/game/touchpad.js) */
+#pad { position: fixed; inset: 0; z-index: 5; pointer-events: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#pad[hidden] { display: none; }
+#pad-body { position: absolute; background: linear-gradient(#1a182e, #110f20 70%); border-top: 1px solid #2a2544; border-bottom-right-radius: 72px; }
+#pad-body::after { content: ''; position: absolute; right: 22px; bottom: 44px; width: 58px; height: 46px; transform: rotate(-28deg);
+  background: repeating-linear-gradient(90deg, #07060e 0 5px, transparent 5px 11px); border-radius: 3px; opacity: .8; }
+.dpad, .pbtn { position: absolute; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.dpad svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dpad .hl { opacity: 0; }
+.dpad.up .hl.u, .dpad.down .hl.d, .dpad.left .hl.l, .dpad.right .hl.r { opacity: .2; }
+.pbtn { border: 0; margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; cursor: pointer; }
+.pbtn.ab { border-radius: 50%; color: #3b1509; font-size: 20px; font-weight: 800;
+  background: radial-gradient(circle at 34% 28%, #f7b391 0, #e3825b 40%, #b9573a 82%);
+  box-shadow: 0 4px 0 #6d2d17, 0 8px 16px rgba(0, 0, 0, .45), inset 0 -3px 6px rgba(0, 0, 0, .2); }
+.pbtn.ab.on { transform: translateY(3px); filter: brightness(.9); box-shadow: 0 1px 0 #6d2d17, 0 3px 6px rgba(0, 0, 0, .45), inset 0 2px 6px rgba(0, 0, 0, .3); }
+.pbtn.pill { border-radius: 11px; color: #bab4d8; font-size: 9px; font-weight: 800; letter-spacing: .14em;
+  background: linear-gradient(#47445f, #34324b); box-shadow: 0 2px 0 #14121f, 0 4px 8px rgba(0, 0, 0, .35); }
+#pad.portrait .pbtn.pill { transform: rotate(-24deg); }
+.pbtn.pill.on { filter: brightness(1.3); }
+
+/* Google sign-in gate + cloud saves (src/engine/game/cloudsave.js) */
+#gate { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; background: #0d0c16; }
+#gate[hidden] { display: none; }
+.gate-card { width: min(380px, 100%); box-sizing: border-box; padding: 22px 20px 18px; border-radius: 6px; background: #17152c; color: #d8d3ee; text-align: center;
+  border: 2px solid #f3f0e9; box-shadow: 0 0 0 4px #17152c, 0 0 0 6px #5a5480, 0 20px 50px rgba(0, 0, 0, .6); font: 15px/1.45 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+.gate-card h2 { margin: 0 0 8px; font-size: 19px; font-weight: 700; color: #ffd66a; letter-spacing: .02em; }
+.gate-card p { margin: 0 0 16px; color: #a9a3c9; font-size: 14px; }
+#gate-google { width: 100%; height: 46px; border: 0; border-radius: 8px; background: #e08a5f; color: #1b1020; font: 800 15px/1 ui-sans-serif, system-ui, sans-serif; cursor: pointer; }
+#gate-google:disabled { opacity: .6; }
+.gate-row { display: flex; justify-content: center; gap: 18px; }
+.gate-row[hidden] { display: none; }
+.gate-row button, #who button { border: 0; background: none; color: #e08a5f; font: 600 13px/1 ui-sans-serif, system-ui, sans-serif; padding: 8px 0; cursor: pointer; }
+#who { position: fixed; z-index: 20; top: 8px; right: 10px; display: flex; align-items: center; gap: 10px; font: 500 12px/1 ui-sans-serif, system-ui, sans-serif; color: #8a83a8; opacity: .55; transition: opacity .2s; }
+#who:hover, #who:focus-within { opacity: 1; }
+#who[hidden], html.touch #who { display: none; }
+#cloud-toast { position: fixed; z-index: 30; left: 50%; top: 12px; transform: translate(-50%, -8px); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  padding: 8px 14px; border-radius: 18px; background: #17152c; border: 1px solid #2f2950; color: #5fd3b0; font: 600 13px/1 ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
+#cloud-toast.show { opacity: 1; transform: translate(-50%, 0); }

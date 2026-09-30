@@ -1,4 +1,4 @@
-// Headless runner: loads the game's scripts into a Node VM and dumps frames to PNG.
+// Headless runner: runs the game engine in a Node VM (bundled from src/engine/engine.ts) and dumps frames to PNG.
 'use strict';
 const vm = require('vm'), fs = require('fs'), path = require('path'), zlib = require('zlib');
 const ROOT = path.join(__dirname, '..');
@@ -19,10 +19,17 @@ function loadGame(opts) {
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
-  const html = fs.readFileSync(path.join(ROOT, process.env.PKHTML || 'index.html'), 'utf8');
-  const srcs = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]).filter(s => !/^https?:/.test(s)); // the CDN supabase-js is browser-only
-  for (const s of srcs) vm.runInContext(fs.readFileSync(path.join(ROOT, s), 'utf8'), ctx, { filename: s });
+  vm.runInContext(engineBundle(), ctx, { filename: 'engine.bundle.js' });
   return ctx;
+}
+
+// src/engine/engine.ts bundled once per process (JS and TypeScript alike); the browser-only platform.ts stays out
+let bundle = null;
+function engineBundle() {
+  if (!bundle) bundle = require('esbuild').buildSync({
+    entryPoints: [path.join(ROOT, 'src', 'engine', 'engine.ts')], bundle: true, write: false, format: 'iife', platform: 'neutral', target: 'es2020',
+  }).outputFiles[0].text;
+  return bundle;
 }
 
 const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();

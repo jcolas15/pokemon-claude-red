@@ -1,0 +1,7 @@
+# keep uploads to the app itself (Vercel builds it with pnpm build)
+vendor/
+node_modules/
+.next/
+src/generated/
+dist/
+*.log

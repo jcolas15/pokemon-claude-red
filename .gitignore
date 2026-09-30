@@ -9,3 +9,14 @@ dist/
 
 # local reference checkouts (pokecrystal for tools/convert_gen2.js)
 vendor/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+.env*.local
+.vercel
+
+# generated at build time (tools/guide-data.js)
+src/generated/
