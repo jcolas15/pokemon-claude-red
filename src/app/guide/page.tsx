@@ -118,39 +118,39 @@ export default function Guide() {
           <div className={s.chapters}>
             <Chapter n="01" heading="Pallet Town to Pewter City" lv="Lv 12–14" open>
               <li>Pick your starter in Oak&apos;s lab. Your rival battles you straight away (Lv 5).</li>
-              <li>Walk to Viridian City&apos;s Poké Mart, collect <b>Oak&apos;s Parcel</b> and bring it back: you get the <b>Pokédex</b> and Poké Balls. Route 1 now has <b>Sentret</b> and <b>Hoothoot</b> too.</li>
+              <li>Walk to Viridian City&apos;s Poké Mart, collect <b>Oak&apos;s Parcel</b> and bring it back: you get the <b>Pokédex</b> and Poké Balls. About half of Route 1&apos;s wild POKéMON are now <b>Sentret</b> and <b>Hoothoot</b>, and roughly half of every wild area in Kanto is Gen 2.</li>
               <li>Back in Viridian, the old man shows you how to catch POKéMON. Remember him for the <a href="#glitches">MissingNo. glitch</a>.</li>
-              <li>Optional: Route 22 (west of Viridian) has your rival (Lv 8–9), Nidoran♂/♀, and <b>Mareep</b>.</li>
-              <li>Go north through <b>Viridian Forest</b>: mostly Weedle and Kakuna, plus <b>Ledyba</b> and <b>Spinarak</b>, and Pikachu, Caterpie and Metapod at 5% each.</li>
+              <li>Optional: Route 22 (west of Viridian) has your rival (Lv 8–9), Nidoran♂/♀, <b>Mareep</b> and <b>Sentret</b>.</li>
+              <li>Go north through <b>Viridian Forest</b>: <b>Spinarak</b>, <b>Ledyba</b> and <b>Pineco</b> now outnumber the Weedle and Kakuna; Pikachu, Caterpie and Metapod are still 5% each.</li>
               <li>In Pewter, the gentleman in the Pokémon Center gives you an <b>Igglybuff</b>.</li>
               <li><b>Brock</b> (Rock) now fields a Sudowoodo too. Its Low Kick is his only real attack, and its high Defense shrugs off Ember, so a Charmander start wants a second POKéMON around level 13. Water, Grass and Fighting all work.</li>
             </Chapter>
             <Chapter n="02" heading="Mt. Moon to Cerulean City" lv="Lv 20–22">
-              <li>Route 3 adds <b>Hoppip</b> and <b>Mareep</b>. In the Pokémon Center at Mt. Moon, the gentleman gives you a <b>Cleffa</b>, and a salesman sells a Magikarp for $500.</li>
-              <li><b>Mt. Moon</b>: Zubat everywhere, plus Clefairy. At the end you choose the <b>Dome Fossil</b> (Kabuto) or <b>Helix Fossil</b> (Omanyte).</li>
-              <li>In Cerulean, your rival waits on the bridge north of town (Lv 15–18). Routes 24 and 25 add <b>Marill</b>, <b>Natu</b>, <b>Sunkern</b> and <b>Pineco</b>.</li>
+              <li>Route 3 adds <b>Hoppip</b>, <b>Mareep</b> and <b>Sunkern</b>, and Route 4 <b>Aipom</b>. In the Pokémon Center at Mt. Moon, the gentleman gives you a <b>Cleffa</b>, and a salesman sells a Magikarp for $500.</li>
+              <li><b>Mt. Moon</b>: Zubat, Geodude and Paras alongside <b>Dunsparce</b>, <b>Phanpy</b> and a rare <b>Shuckle</b>, plus Clefairy. At the end you choose the <b>Dome Fossil</b> (Kabuto) or <b>Helix Fossil</b> (Omanyte).</li>
+              <li>In Cerulean, your rival waits on the bridge north of town (Lv 15–18). Routes 24 and 25 add <b>Marill</b>, <b>Hoppip</b>, <b>Ledyba</b>, <b>Natu</b>, <b>Sunkern</b> and <b>Pineco</b>.</li>
               <li>Help Bill for the <b>S.S. Ticket</b>, then talk to him again: he gives you <b>Chikorita, Cyndaquil or Totodile</b> (Lv 10).</li>
               <li>The granny in Cerulean&apos;s trade house swaps a <b>Jigglypuff for Smoochum</b>.</li>
               <li><b>Misty</b> (Water): Grass or Electric. Her Starmie at Lv 21 is the real test.</li>
             </Chapter>
             <Chapter n="03" heading="Vermilion City and the S.S. Anne" lv="Lv 24–26">
-              <li>The <b>Day Care</b> on Route 5 has an egg that hatched into a <b>Togepi</b>; the old man gives it to you. Routes 5–6 add <b>Snubbull</b>, <b>Natu</b> and <b>Wooper</b>.</li>
+              <li>The <b>Day Care</b> on Route 5 has an egg that hatched into a <b>Togepi</b>; the old man gives it to you. Routes 5–6 add <b>Snubbull</b>, <b>Aipom</b>, <b>Natu</b>, <b>Wooper</b> and <b>Marill</b>; Route 11 has Wooper, Sunkern and Natu.</li>
               <li>In the Pokémon Fan Club, the Pikachu fan gives you a <b>Pichu</b>, and the chairman a <b>Bike Voucher</b>. The sailor in Vermilion&apos;s Pokémon Center trades a <b>Voltorb for Elekid</b>.</li>
               <li>Board the <b>S.S. Anne</b>: your rival (Lv 16–20), <b>HM01 Cut</b> from the captain, and a <b>King&apos;s Rock</b> hidden in the lower-deck cabins.</li>
               <li><b>Lt. Surge</b> (Electric): Ground is immune to his whole team.</li>
               <li>With 10+ POKéMON owned, Oak&apos;s aide on Route 2 gives <b>HM05 Flash</b> for Rock Tunnel.</li>
             </Chapter>
             <Chapter n="04" heading="Rock Tunnel, Lavender and Celadon" lv="Lv 30–32">
-              <li>Routes 9–10 add <b>Phanpy</b> and <b>Sudowoodo</b>; <b>Dunsparce</b> hides in Rock Tunnel and Diglett&apos;s Cave.</li>
-              <li>Routes 7–8 add <b>Houndour</b>, <b>Murkrow</b> and <b>Snubbull</b>.</li>
+              <li>Routes 9–10 add <b>Phanpy</b>, <b>Hoothoot</b>, <b>Flaaffy</b> and <b>Sudowoodo</b>; Rock Tunnel has <b>Dunsparce</b>, Sudowoodo and Shuckle, and Diglett&apos;s Cave Phanpy and Dunsparce.</li>
+              <li>Routes 7–8 add <b>Houndour</b>, <b>Snubbull</b>, <b>Aipom</b> and <b>Murkrow</b>.</li>
               <li><b>Celadon Dept. Store 4F</b> sells a <b>Sun Stone</b> next to the other stones. Celadon Mansion&apos;s rooftop room has a free <b>Eevee</b>: a Sun Stone makes Espeon, a Moon Stone makes Umbreon.</li>
               <li><b>Erika</b> (Grass): Fire, Ice or Flying.</li>
               <li>The poster in the <b>Game Corner</b> hides the Rocket Hideout. Beat Giovanni for the <b>Silph Scope</b>.</li>
             </Chapter>
             <Chapter n="05" heading="Pokémon Tower to Fuchsia City" lv="Lv 38–40">
-              <li>Climb Lavender&apos;s <b>Pokémon Tower</b> with the Silph Scope (<b>Misdreavus</b> haunts it now). Rescue <b>Mr. Fuji</b> for the <b>Poké Flute</b>.</li>
-              <li>Wake the <b>Snorlax</b> on Route 12 and Route 16 (Lv 30 each). The Route 12 house gives the <b>Super Rod</b>, which now also hooks <b>Remoraid</b> and <b>Qwilfish</b>. Routes 12–15 add <b>Yanma</b>, <b>Stantler</b>, <b>Miltank</b> and <b>Noctowl</b>.</li>
-              <li>The <b>Safari Zone</b> adds <b>Teddiursa, Ursaring, Girafarig</b> and <b>Heracross</b>, and holds <b>HM03 Surf</b> and the Gold Teeth (the Warden trades them for <b>HM04 Strength</b>).</li>
+              <li>Climb Lavender&apos;s <b>Pokémon Tower</b> with the Silph Scope (<b>Misdreavus</b> and <b>Murkrow</b> haunt it now). Rescue <b>Mr. Fuji</b> for the <b>Poké Flute</b>.</li>
+              <li>Wake the <b>Snorlax</b> on Route 12 and Route 16 (Lv 30 each). The Route 12 house gives the <b>Super Rod</b>, which now also hooks <b>Remoraid</b> and <b>Qwilfish</b>. Routes 12–15 add <b>Yanma</b>, <b>Skiploom</b>, <b>Jumpluff</b>, <b>Ledian</b>, <b>Stantler</b>, <b>Natu</b>, <b>Miltank</b> and <b>Noctowl</b>; Routes 16–18 <b>Furret</b>, <b>Aipom</b>, <b>Smeargle</b>, <b>Murkrow</b> and <b>Gligar</b>.</li>
+              <li>The <b>Safari Zone</b> adds <b>Teddiursa, Ursaring, Girafarig, Heracross, Donphan</b> and <b>Stantler</b>, and holds <b>HM03 Surf</b> and the Gold Teeth (the Warden trades them for <b>HM04 Strength</b>).</li>
               <li><b>Koga</b> (Poison): Psychic. Weezing&apos;s Toxic builds up every turn, and Smokescreen and Muk&apos;s Minimize make you miss.</li>
             </Chapter>
             <Chapter n="06" heading="Saffron City and Silph Co." lv="Lv 42–44">
@@ -160,15 +160,15 @@ export default function Guide() {
               <li><b>Sabrina</b> (Psychic): a Dark-type such as Umbreon or Houndour ignores her Psychic moves.</li>
             </Chapter>
             <Chapter n="07" heading="Cinnabar Island" lv="Lv 47–50">
-              <li>Surf to Cinnabar via Route 21 or Routes 19–20 (<b>Corsola</b>, <b>Mantine</b>; the Super Rod hooks <b>Chinchou</b>). The <b>Seafoam Islands</b> add Swinub, Delibird, Sneasel and Shuckle, plus a hidden <b>King&apos;s Rock</b> (B3F) and <b>Dragon Scale</b> (B4F).</li>
-              <li>The <b>Pokémon Mansion</b> holds the Secret Key and now <b>Slugma</b> and <b>Houndoom</b>. The Cinnabar Lab trade room swaps a <b>Growlithe for Magby</b>.</li>
+              <li>Surf to Cinnabar via Route 21 or Routes 19–20: surfing now turns up <b>Chinchou</b>, <b>Lanturn</b>, <b>Corsola</b>, <b>Remoraid</b>, <b>Qwilfish</b> and <b>Mantine</b> (Route 21 adds Octillery, and Noctowl, Jumpluff and Azumarill in its grass). The <b>Seafoam Islands</b> add Swinub, Piloswine, Delibird, Sneasel and Shuckle, plus a hidden <b>King&apos;s Rock</b> (B3F) and <b>Dragon Scale</b> (B4F).</li>
+              <li>The <b>Pokémon Mansion</b> holds the Secret Key and now <b>Slugma</b>, <b>Magcargo</b> and <b>Houndoom</b>. The Cinnabar Lab trade room swaps a <b>Growlithe for Magby</b>.</li>
               <li><b>Blaine</b> (Fire): Water, Ground or Rock.</li>
-              <li>Side trip: the <b>Power Plant</b> (Zapdos) now has <b>Flaaffy</b>, <b>Ampharos</b> and a hidden <b>Metal Coat</b>.</li>
+              <li>Side trip: the <b>Power Plant</b> (Zapdos) now has <b>Flaaffy</b>, <b>Chinchou</b>, <b>Lanturn</b> and a hidden <b>Metal Coat</b>.</li>
             </Chapter>
             <Chapter n="08" heading="Viridian Gym, the League and after" lv="Lv 55–60">
               <li><b>Giovanni</b> (Ground): Water, Grass or Ice.</li>
-              <li>Route 23 and <b>Victory Road</b> add <b>Gligar</b>, <b>Skarmory</b> and a rare <b>Pupitar</b>, with a second <b>Metal Coat</b> hidden on 2F.</li>
-              <li>After the Hall of Fame: <b>Raikou, Entei and Suicune</b> start roaming, <b>Lugia, Ho-Oh and Celebi</b> appear, and <b>Cerulean Cave</b> opens with Mewtwo, <b>Wobbuffet</b>, <b>Unown</b> and a very rare <b>Larvitar</b>.</li>
+              <li>Route 23 and <b>Victory Road</b> add <b>Gligar</b>, <b>Skarmory</b>, <b>Sudowoodo</b>, <b>Donphan</b> and <b>Pupitar</b>, with a second <b>Metal Coat</b> hidden on 2F.</li>
+              <li>After the Hall of Fame: <b>Raikou, Entei and Suicune</b> start roaming, <b>Lugia, Ho-Oh and Celebi</b> appear, and <b>Cerulean Cave</b> opens with Mewtwo, <b>Wobbuffet</b>, <b>Unown</b>, <b>Sneasel</b>, <b>Misdreavus</b>, a very rare <b>Larvitar</b> and an even rarer wild <b>Tyranitar</b>.</li>
             </Chapter>
           </div>
         </Section>
@@ -346,7 +346,7 @@ export default function Guide() {
             </div>
             <div className={s.panel}><h3>Who&apos;s That POKéMON?</h3><p>On the title screen: name the silhouette before time runs out. <b>DAILY</b> gives everyone the same 10; <b>ENDLESS</b> runs until you miss. All 251 POKéMON are in the pool.</p></div>
             <div className={s.panel}><h3>Completing the Pokédex</h3><p>The Pokédex holds <b>251</b>. PROF. OAK rates your progress at any PC all the way up, and the game designer in <b>Celadon Mansion 3F</b> awards the diploma once you own every POKéMON except Mew and Celebi. Milestone share cards now run to 251.</p></div>
-            <div className={s.panel}><h3>Share and customize</h3><p>A new game lets you design your trainer&apos;s look. <b>SHARE</b> in the START menu makes cards for badges, catches and Pokédex milestones.</p></div>
+            <div className={s.panel}><h3>Share and customize</h3><p>A new game lets you design your trainer&apos;s look, and <b>OUTFIT</b> in the START menu changes it any time (say NO at the end to keep your old one). <b>SHARE</b> in the START menu makes cards for badges, catches and Pokédex milestones.</p></div>
           </div>
         </Section>
 

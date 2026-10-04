@@ -9,7 +9,8 @@ in `node_modules/next/dist/docs/` before writing Next.js code, and heed deprecat
 |---|---|
 | `pnpm dev` / `pnpm dev:lan` | Guide data, then the dev server on :8784 (`dev:lan` is reachable from a phone on the Wi-Fi) |
 | `pnpm build` | Guide data, then the production build |
-| `pnpm typecheck`, `pnpm lint` | Minimum bar before calling work done, together with a clean build |
+| `pnpm typecheck`, `pnpm lint`, `pnpm test` | Minimum bar before calling work done, together with a clean build |
+| `pnpm test` | The game tests in `tests/` (Vitest): Gen 2 species and world, Elite Four 2, Pokédex, roamers, wild encounters, outfit, and a pixel check of six reference scenes |
 | `node tools/gymsim.js [runs] [CLASS]` | Balance check: win rates for every gym, Elite Four and rival fight, vanilla vs Gen 2 (Phase 7) |
 | `node tools/fuzzbattle.js`, `node tools/talkfuzz.js`, `node -r ./tools/pathaudit.js tools/stepfuzz.js`, `node tools/warpcheck.js` | Headless game tests; compare against the previous commit when behavior might change |
 
@@ -33,7 +34,7 @@ the original games (Gen 2 Pokémon under Gen 1 rules, roaming legendaries, a sec
 The engine (`src/engine/`) is TypeScript modules that share a global `G`; `src/engine/engine.ts` is the only place the
 load order is written, and `tools/headless.js` bundles it for the tests. Most files still start with `// @ts-nocheck`
 and are typed one at a time (`docs/nextjs-migration.md`); the typed ones are listed in `eslint.config.mjs`. New
-engine code is typed from the start. Keep the headless tests green through every step.
+engine code is typed from the start. Keep `pnpm test` and the headless tools green through every step; a deliberate rendering change updates the hashes in `tests/pixels.test.js`.
 
 ## Gen 2 work
 

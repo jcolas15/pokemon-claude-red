@@ -36,7 +36,7 @@ G.startMenu = function* () {
       const items = [];
       if (G.flag('EVENT_GOT_POKEDEX')) items.push('POKéDEX');
       if (G.state.party.length) items.push('POKéMON');
-      items.push('ITEM', G.state.name, 'SHARE', 'SAVE', 'OPTION', 'EXIT');
+      items.push('ITEM', G.state.name, 'OUTFIT', 'SHARE', 'SAVE', 'OPTION', 'EXIT');
       const r = yield* G.choose(items, { x: 222, y: 6, w: 92, sel: Math.min(sel, items.length - 1) });
       if (r < 0 || items[r] === 'EXIT') return;
       sel = r;
@@ -45,6 +45,12 @@ G.startMenu = function* () {
       else if (it === 'POKéMON') { const res = yield* G.partyScreen({}); if (res === -2) return; }
       else if (it === 'ITEM') { yield* G.bagScreen(); if (G.closeMenus) { G.closeMenus = false; return; } }
       else if (it === G.state.name) yield* G.trainerCard();
+      else if (it === 'OUTFIT') {
+        const before = Object.assign({}, G.state.look);
+        const look = yield* G.customizeLook(before);
+        if (yield* G.ask('Keep this new look?')) G.state.look = look;
+        else G.applyLook(before);
+      }
       else if (it === 'SHARE') yield* G.shareMenu();
       else if (it === 'SAVE') {
         if (yield* G.ask('Would you like to SAVE the game?')) {

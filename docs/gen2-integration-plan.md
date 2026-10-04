@@ -307,6 +307,22 @@ legendary on share cards.
 
 **Verify:** the Pokédex scrolls to #251, share cards render with new counts, and an old save imports and loads.
 
+## Follow-up: half the wild is Gen 2 (2026-10-03)
+
+The owner wanted Kanto to feel like a mixed Kanto and Johto game, so `WILD` in `gen2_world.ts` became a list of Gen 2
+species per area plus a rule, replacing the hand-placed slots.
+- **Share:** about half of every area's encounter odds are Gen 2, averaging 49% over 58 grass and surf tables. The one
+  exception is the Safari Zone center at 25%, because so many of its slots hold rare Pokémon.
+- **What stays Gen 1:** slot 0 (the area's staple), and any Gen 1 species already at 5% or less (Viridian Forest's
+  Pikachu, Mt. Moon's Clefairy). Each Gen 1 species keeps a slot in its area unless that holds the area under 40% and
+  it can be caught elsewhere; none of Red's species is gone from the wild.
+- **Levels:** each Gen 2 species takes the stage its slot's level has reached, which puts Ledian, Lanturn, Donphan,
+  Piloswine, Octillery and others in the wild. 56 Gen 2 species are now wild, up from 47.
+- **Larvitar** is pinned to Cerulean Cave 1F's 1% slot.
+- **Bug fixed:** grass encounters are stored the way Red stores them, as Gen 1 internal index numbers, which Gen 2
+  species don't have. Every Gen 2 grass encounter used to appear as 'M. They are now stored by name
+  (`game/glitches.ts`); the old man MissingNo. glitch is unchanged.
+
 ## Phase 7: balance and playtest — done
 
 Measured headlessly with `node tools/gymsim.js`: every gym leader, Elite Four member and rival fight, played by a greedy

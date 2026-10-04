@@ -154,7 +154,9 @@ G.drawGlitchQty = function (s, n, right, y) {
 };
 
 // ---------------- wild encounters, done the way TryDoWildEncounter does them ----------------
-const pack = mons => [].concat(...mons.map(([lv, sp]) => [lv & 255, INDEX[sp] || 0]));
+// Gen 2 POKéMON have no Gen 1 internal index, so they're kept by name (an index of 0 would read back as 'M)
+const pack = mons => [].concat(...mons.map(([lv, sp]) => [lv & 255, INDEX[sp] || sp]));
+const unpack = b => (typeof b === 'string' && G.DATA.species[b] ? b : speciesFor(b));
 // LoadWildData: only a map WITH grass encounters overwrites the grass list (Cinnabar, the sea routes and towns don't)
 function loadWildData(map) {
   const w = G.DATA.wild[map.d.cnst];
@@ -186,7 +188,7 @@ G.encounters.check = function (map, x, y) {
   const i = slot();
   let lv, sp;
   if (bl === WATER) { if (w.water.mons.length !== 10) return false; [lv, sp] = w.water.mons[i]; }
-  else { const g = grassRAM(); lv = g[i * 2]; sp = speciesFor(g[i * 2 + 1]); }
+  else { const g = grassRAM(); lv = g[i * 2]; sp = unpack(g[i * 2 + 1]); }
   if (S.repel > 0) { const lead = S.party.find(m => m.hp > 0); if (lead && lv < lead.level) return false; }
   const safari = /^SafariZone/.test(map.name) && S.safariBalls !== undefined && S.safariSteps !== undefined;
   G.spawnScript(G.startWildBattle(sp, lv, { safari }), 'wild');
