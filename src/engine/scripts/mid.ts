@@ -596,7 +596,7 @@ def('CeladonMansion1F', {
     CELADONMANSION1F_NIDORANF: cryTalk('CeladonMansion1FNidoranFText', 'NIDORAN_F'),
   },
 });
-// game designer: diploma once every POKéMON but MEW is owned
+// game designer: diploma once every POKéMON but the mythicals is owned
 G.diploma = function* () {
   const H = G.gfx.hex;
   const sc = { opaque: true, t: 0, done: false, update(f) { this.t++; if (f && this.t > 20 && (G.input.pressed.a || G.input.pressed.b)) this.done = true; }, draw(s) {
@@ -616,9 +616,10 @@ G.diploma = function* () {
 def('CeladonMansion3F', {
   talk: {
     CELADONMANSION3F_GAME_DESIGNER: function* () {
-      // every POKéMON but MEW and CELEBI (one needs a glitch, the other is a post-game one-off)
-      const owned = Object.keys(G.state.dex.caught).filter(sp => sp !== 'MEW' && sp !== 'CELEBI' && G.DATA.species[sp] && G.DATA.species[sp].dex >= 1).length;
-      if (owned < G.DATA.dexOrder.length - 3) { yield* S.say('CeladonMansion3FGameDesignerText'); return; }
+      // every POKéMON but the mythicals (MEW needs a glitch; CELEBI, JIRACHI and DEOXYS are post-game one-offs)
+      const MYTHICAL = ['MEW', 'CELEBI', 'JIRACHI', 'DEOXYS'];
+      const owned = Object.keys(G.state.dex.caught).filter(sp => !MYTHICAL.includes(sp) && G.DATA.species[sp] && G.DATA.species[sp].dex >= 1).length;
+      if (owned < G.DATA.dexOrder.length - 1 - MYTHICAL.length) { yield* S.say('CeladonMansion3FGameDesignerText'); return; }
       yield* S.say('CeladonMansion3FGameDesignerCompletedDexText');
       yield* G.diploma();
     },

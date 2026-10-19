@@ -71,6 +71,12 @@ G.CAST = {
   // the Gen 2 Elite Four newcomers (Elite Four 2, after the first HALL OF FAME)
   will: { head: 'spiky', hair: '#8a5ac8', shirt: '#3a2e6a', accent: '#e8e0f0', pants: '#2a2448', shoes: '#16142a' },
   karen: { head: 'long', hair: '#24202e', body: 'dress', shirt: '#3a4a8a', accent: '#e8c84a', shoes: '#1a1a2a' },
+  // the Hoenn Elite Four (Elite Four 3, after the Gen 2 rematch)
+  sidney: { head: 'spiky', hair: '#2a2228', shirt: '#2a2a34', accent: '#c83a3a', pants: '#3a3a4a', shoes: '#1a1a1a' },
+  phoebe: { head: 'short', hair: '#2a2a3a', skin: '#c88a5a', body: 'dress', shirt: '#ece4ec', accent: '#d84a8a', shoes: '#6a3a5a' },
+  glacia: { head: 'long', hair: '#e8e8f4', body: 'dress', shirt: '#8ab8e8', accent: '#f8f8ff', shoes: '#4a6a9a' },
+  drake: { head: 'short', hair: '#e8e8e8', beard: '#e8e8e8', shirt: '#2a3a7a', accent: '#e8c84a', pants: '#2a2a3a', shoes: '#1a1a22' },
+  steven: { head: 'short', hair: '#a8b0c8', shirt: '#2a2a34', accent: '#c83a3a', pants: '#2a2a34', shoes: '#16161e' },
   poke_ball: { object: 'ball' },
   boulder: { object: 'boulder' },
   pokedex: { object: 'pokedex' },

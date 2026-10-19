@@ -318,7 +318,7 @@ G.ambientDark = function (s, ow, cx, cy) {
   if (!DARK_MAPS.has(ow.map.name) || ow.flashed) return;
   const p = ow.player, px = p.px + 8 - cx, py = p.py + 4 - cy;
   const d = s.data;
-  for (let y = 0; y < 180; y++) for (let x = 0; x < 320; x++) {
+  for (let y = 0; y < s.h; y++) for (let x = 0; x < 320; x++) {
     const r = Math.hypot(x - px, (y - py) * 1.1);
     if (r < 18) continue;
     const k = Math.min(1, (r - 18) / 14);

@@ -299,7 +299,8 @@ function* linkBattle(mine, foes, o) {
 const TOWER_CLASSES = ['COOLTRAINER_M', 'COOLTRAINER_F', 'BLACKBELT', 'PSYCHIC_TR', 'SCIENTIST', 'GENTLEMAN', 'BEAUTY', 'HIKER', 'SUPER_NERD', 'BIRD_KEEPER', 'JUGGLER', 'TAMER',
   'ENGINEER', 'FISHER', 'SWIMMER', 'ROCKER', 'CHANNELER', 'BIKER', 'GAMBLER', 'POKEMANIAC', 'BURGLAR', 'CUE_BALL', 'SAILOR', 'LASS', 'JR_TRAINER_M', 'JR_TRAINER_F'];
 const NAMES = ['ALEX', 'SAM', 'JORDAN', 'RILEY', 'CASEY', 'MORGAN', 'TAYLOR', 'JAMIE', 'ROBIN', 'AVERY', 'QUINN', 'DREW', 'SKYLER', 'REESE', 'BLAKE', 'KAI', 'NOVA', 'SAGE', 'ROWAN', 'EMERY'];
-const LEGENDS = new Set(['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'MEWTWO', 'MEW', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI']);
+const LEGENDS = new Set(['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'MEWTWO', 'MEW', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI',
+  'REGIROCK', 'REGICE', 'REGISTEEL', 'LATIAS', 'LATIOS', 'KYOGRE', 'GROUDON', 'RAYQUAZA', 'JIRACHI', 'DEOXYS']);
 const UTIL = { SPORE: 95, SLEEP_POWDER: 80, LOVELY_KISS: 75, THUNDER_WAVE: 75, RECOVER: 75, SOFTBOILED: 75, AMNESIA: 70, SWORDS_DANCE: 65, HYPNOSIS: 55, STUN_SPORE: 55, TOXIC: 50,
   REST: 45, CONFUSE_RAY: 40, LEECH_SEED: 40, REFLECT: 40, AGILITY: 40, SUBSTITUTE: 35, SING: 35, GLARE: 60 };
 const WEAK = new Set(['SELFDESTRUCT', 'EXPLOSION', 'DREAM_EATER', 'SKY_ATTACK', 'SKULL_BASH', 'SOLARBEAM', 'RAZOR_WIND', 'DIG', 'FLY', 'FOCUS_ENERGY', 'RAGE', 'BIDE', 'COUNTER', 'SUPER_FANG', 'DRAGON_RAGE', 'SONICBOOM', 'NIGHT_SHADE', 'SEISMIC_TOSS', 'PSYWAVE']);
@@ -325,7 +326,8 @@ function towerTrainer(n) {
   const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
   const tier = n >= 21 ? 2 : n >= 7 ? 1 : 0;
   const band = [[300, 399], [380, 459], [440, 999]][tier];
-  const pool = Object.keys(G.DATA.species).filter(sp => G.DATA.species[sp].dex >= 1 && !LEGENDS.has(sp) && bst(sp) >= band[0] && bst(sp) <= band[1]);
+  // only POKéMON with a drawing, so Gen 3 joins the Tower as its art lands (docs/gen3-integration-plan.md, Phase 3)
+  const pool = Object.keys(G.DATA.species).filter(sp => G.DATA.species[sp].dex >= 1 && !LEGENDS.has(sp) && G.hasMonArt(sp) && bst(sp) >= band[0] && bst(sp) <= band[1]);
   const party = [];
   while (party.length < 3) {
     const sp = pool[Math.floor(Math.random() * pool.length)];

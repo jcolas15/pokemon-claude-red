@@ -5,7 +5,7 @@ import { loadGame, check, drive } from './helpers.js';
 
 describe('Gen 2 world', () => {
   const { G, D } = loadGame();
-  const g2 = D.dexOrder.slice(152);
+  const g2 = D.dexOrder.slice(152, 252);
   const isG2 = sp => D.species[sp] && D.species[sp].dex > 151;
 
   it('every species is obtainable at a sane level', () => {
@@ -23,8 +23,10 @@ describe('Gen 2 world', () => {
     const missing = g2.filter(sp => !from[sp]);
     check(!missing.length, 'all 100 Gen 2 species obtainable; missing: ' + missing.join(', '));
 
+    // baby evolutions don't count: wild Pikachu and Marill appear below their babies' Lv 15, as in the real games
+    const BABIES = ['PICHU', 'CLEFFA', 'IGGLYBUFF', 'TOGEPI', 'AZURILL', 'WYNAUT'];
     const minLv = {};
-    for (const d of Object.values(D.species)) for (const e of d.evos || []) if (e.type === 'level') minLv[e.to] = Math.min(minLv[e.to] || 999, e.level);
+    for (const [from, d] of Object.entries(D.species)) for (const e of d.evos || []) if (e.type === 'level' && !BABIES.includes(from)) minLv[e.to] = Math.min(minLv[e.to] || 999, e.level);
     const low = [];
     for (const [c, w] of Object.entries(D.wild)) for (const k of ['grass', 'water']) for (const [lv, sp] of w[k].mons) if (isG2(sp) && minLv[sp] > lv) low.push(c + ' ' + sp + ' Lv' + lv);
     for (const [cls, teams] of Object.entries(D.parties)) teams.forEach((t, n) => t.forEach(([lv, sp]) => { if (isG2(sp) && minLv[sp] > lv) low.push(cls + '#' + (n + 1) + ' ' + sp + ' Lv' + lv); }));

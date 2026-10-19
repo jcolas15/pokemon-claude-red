@@ -24,7 +24,7 @@ export default function RivalPicker({ fights }: { fights: Fight[] }) {
             <div className={s.where}>{f.where}<span>{f.when}</span></div>
             <div className={s.pills}>
               {f.teams[starter].map((m, j) => (
-                <span key={j} className={s.pill}>{title(m.name)}<i>Lv{m.level}{m.gen2 ? " · GEN 2" : ""}</i></span>
+                <span key={j} className={s.pill}>{title(m.name)}<i>Lv{m.level}{m.gen > 1 ? ` · GEN ${m.gen}` : ""}</i></span>
               ))}
             </div>
           </div>

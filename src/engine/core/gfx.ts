@@ -311,8 +311,26 @@ export function fromRows(rows: string[], pal: Record<string, string | Color>): S
 
 export const screen = new Surface(W, H);
 
+// Touch portrait shows a taller frame: the overworld fills all of it and every other scene draws in a W x H band
+// at the bottom (src/engine/core/engine.ts drawTall, src/engine/game/touchpad.ts sets the height).
+export const MAX_VIEW_H = 480;
+// the phone layout also zooms the map (src/engine/core/engine.ts draws it on its own canvas, scaled by the browser)
+export const MAP_ZOOM = 1.3;
+export const view = { h: H, band: 0, zoom: 1, mh: H };
+export function setViewHeight(h: number, zoom = 1) {
+  view.h = Math.max(H, Math.min(MAX_VIEW_H, Math.round(h)));
+  view.band = view.h - H;
+  view.zoom = view.h > H ? zoom : 1;
+  view.mh = Math.round(view.h / view.zoom);
+}
+export function bandOf(full: Surface, y: number): Surface {
+  const s = Object.create(Surface.prototype) as Surface;
+  s.w = full.w; s.h = H; s.data = full.data.subarray(y * full.w, (y + H) * full.w);
+  return s;
+}
+
 game().gfx = {
   W, H, rgb, hex, mix, mul, scale, add, screenBlend, lum, hsl, toHsl, shade, ramp, cr, cg, cb, ca,
-  bayer, bayer8, hash2, vnoise, fbm, Surface, fromRows, screen,
+  bayer, bayer8, hash2, vnoise, fbm, Surface, fromRows, screen, view, setViewHeight, MAP_ZOOM,
   TRANSPARENT: 0,
 };

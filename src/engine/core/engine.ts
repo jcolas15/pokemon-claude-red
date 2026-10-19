@@ -2,7 +2,7 @@
 // Scenes: { update(), draw(surf), opaque?:bool, done?:bool }.
 // Coroutines are generator functions; `yield` waits one frame.
 import { game } from '../global';
-import { H, screen, W, type Surface } from './gfx';
+import { H, Surface, bandOf, screen, view, W } from './gfx';
 import * as input from './input';
 
 export interface Scene {
@@ -15,6 +15,11 @@ export interface Scene {
   modal?: boolean;
   /** keeps updating while another scene is on top */
   tickBehind?: boolean;
+  /** draws the whole taller touch-portrait frame instead of the W x H band (the overworld) */
+  tall?: boolean;
+  /** fixed-position overlays (the map-name banner); drawn unzoomed above a zoomed map, else by draw() itself */
+  drawHud?(surf: Surface): void;
+  hudOnTop?: boolean;
   done?: boolean;
   result?: unknown;
   enter?(): void;
@@ -87,13 +92,40 @@ export function step() {
     const focused = i === scenes.length - 1;
     // a scene opened this frame waits a frame for input: the press that opened it (read by a script or the
     // scene below) must not also pick in it
-    if (focused) { if (s.update) s.update(s.bornFrame !== frame); }
+    if (focused) { if (s.update) withBandPointer(s, () => s.update!(s.bornFrame !== frame)); }
     else if (s.tickBehind && s.update) s.update(false);
   }
   input.pointerFallback();
 }
 
-export function draw(surf: Surface) {
+// scenes drawn in the bottom band read the pointer in band coordinates
+function withBandPointer(s: Scene, fn: () => void) {
+  const shift = view.h > H && !s.tall ? view.band : 0;
+  if (!shift) { fn(); return; }
+  const P = input.pointer, y = P.y, inside = P.inside;
+  P.y -= shift; P.inside = inside && P.y >= 0 && P.y < H;
+  try { fn(); } finally { P.y = y; P.inside = inside; }
+}
+
+const BACKDROP = 0xff1a1012;
+// with a map surface (zoomed phone view) the overworld draws there and everything else on a transparent frame above it
+function drawTall(surf: Surface, map?: Surface) {
+  let start = 0;
+  for (let i = scenes.length - 1; i >= 0; i--) if (scenes[i].opaque) { start = i; break; }
+  const band = bandOf(surf, view.band), base = scenes[start];
+  if (base && base.tall && map) {
+    base.hudOnTop = true; base.draw?.(map); base.hudOnTop = false;
+    if (G.fadeSurface) G.fadeSurface(map);
+    surf.clear(0); base.drawHud?.(surf);
+  }
+  else if (base && base.tall) base.draw?.(surf);
+  else { surf.clear(BACKDROP); base?.draw?.(band); }
+  for (let i = start + 1; i < scenes.length; i++) scenes[i].draw?.(band);
+  if (G.postDraw) G.postDraw(surf);
+}
+
+export function draw(surf: Surface, map?: Surface) {
+  if (surf.h > H) { drawTall(surf, map); return; }
   let start = 0;
   for (let i = scenes.length - 1; i >= 0; i--) if (scenes[i].opaque) { start = i; break; }
   for (let i = start; i < scenes.length; i++) scenes[i].draw?.(surf);
@@ -102,12 +134,35 @@ export function draw(surf: Surface) {
 
 // Browser runner: fixed 60Hz timestep, integer scaled canvas
 export function startBrowser(canvas: HTMLCanvasElement) {
-  const surf = screen;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   canvas.width = W; canvas.height = H;
-  const img = ctx.createImageData(W, H);
-  const view = new Uint32Array(img.data.buffer);
+  let img = ctx.createImageData(W, H), pixels = new Uint32Array(img.data.buffer), tall: Surface | null = null;
+  const frameSurface = () => {
+    if (view.h <= H) return screen;
+    if (!tall || tall.h !== view.h) tall = new Surface(W, view.h);
+    return tall;
+  };
+  // zoomed phone view: the map gets its own canvas behind the screen, in a clipped box the same size, scaled up by CSS
+  const mapBox = document.createElement('div'), mapCanvas = document.createElement('canvas'), mapCtx = mapCanvas.getContext('2d');
+  mapBox.style.cssText = 'position:fixed;overflow:hidden;pointer-events:none;display:none';
+  mapCanvas.style.cssText = 'position:absolute;top:0;height:100%';
+  mapBox.appendChild(mapCanvas); canvas.parentNode?.insertBefore(mapBox, canvas);
+  let mapSurf: Surface | null = null, mapImg: ImageData | null = null, mapPixels: Uint32Array | null = null, mapZoom = 0;
+  const mapSurface = () => {
+    if (view.zoom <= 1 || !mapCtx) { mapBox.style.display = 'none'; return null; }
+    if (!mapSurf || mapSurf.h !== view.mh) {
+      mapSurf = new Surface(W, view.mh); mapCanvas.width = W; mapCanvas.height = view.mh;
+      mapImg = mapCtx.createImageData(W, view.mh); mapPixels = new Uint32Array(mapImg.data.buffer);
+    }
+    const cs = canvas.style, bs = mapBox.style;
+    if (bs.left !== cs.left || bs.top !== cs.top || bs.width !== cs.width || bs.height !== cs.height || mapZoom !== view.zoom) {
+      Object.assign(bs, { left: cs.left, top: cs.top, width: cs.width, height: cs.height, display: 'block' }); mapZoom = view.zoom;
+      const w = parseFloat(cs.width) || canvas.clientWidth;
+      Object.assign(mapCanvas.style, { width: w * view.zoom + 'px', left: -w * (view.zoom - 1) / 2 + 'px' });
+    }
+    return mapSurf;
+  };
   function resize() {
     if (G.pageLayout && G.pageLayout(canvas)) return; // touch devices: the page lays out screen + controller (src/engine/game/touchpad.js)
     const s = Math.max(1, Math.floor(Math.min(window.innerWidth / W, window.innerHeight / H)));
@@ -120,7 +175,13 @@ export function startBrowser(canvas: HTMLCanvasElement) {
     acc += Math.min(100, now - last); last = now;
     let n = 0;
     while (acc >= STEP && n < 4) { step(); acc -= STEP; n++; }
-    if (n) { draw(surf); view.set(surf.data); ctx!.putImageData(img, 0, 0); }
+    if (n) {
+      const surf = frameSurface();
+      if (canvas.height !== surf.h) { canvas.height = surf.h; img = ctx!.createImageData(W, surf.h); pixels = new Uint32Array(img.data.buffer); }
+      const map = mapSurface();
+      draw(surf, map ?? undefined); pixels.set(surf.data); ctx!.putImageData(img, 0, 0);
+      if (map && mapImg && mapPixels) { mapPixels.set(map.data); mapCtx!.putImageData(mapImg, 0, 0); }
+    }
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);

@@ -11,7 +11,8 @@
     "lint": "eslint",
     "typecheck": "node tools/guide-data.js && tsc --noEmit",
     "test": "vitest run",
-    "preview:image": "node tools/preview.js"
+    "preview:image": "node tools/preview.js",
+    "map": "node tools/kanto-map.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -5,9 +5,9 @@ import { it, expect } from 'vitest';
 import { headless as H } from './helpers.js';
 
 const EXPECTED = {
-  pallet: '9060facc6390',
-  forest: '992c895442d5',
-  'cerulean-night': 'd3b1656719c2',
+  pallet: 'da1a74cceb3c',
+  forest: '0d787ad30333',
+  'cerulean-night': 'fbdd767103c0',
   battle: 'a0d3fad7d138',
   townmap: 'fa60b459d5c6',
   title: '820048cf6526',

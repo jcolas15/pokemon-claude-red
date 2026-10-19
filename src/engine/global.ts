@@ -10,6 +10,8 @@ export interface GameGlobal {
   preStep?: () => void;
   /** draws over the finished frame (game/overworld, game/share) */
   postDraw?: (surf: Surface) => void;
+  /** darkens a frame for the current screen fade (src/engine/game/overworld.ts) */
+  fadeSurface?: (surf: Surface) => void;
   /** a script task threw (optional; nothing sets it today) */
   onError?: (e: unknown) => void;
   /** touch layouts place the canvas and controller themselves; returns true when it did (game/touchpad) */

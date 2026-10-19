@@ -2,11 +2,11 @@
 (function (G) {
   'use strict';
   const hasAudio = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext) && !window.HEADLESS;
-  let ctx = null, master = null, musicGain = null, sfxGain = null, muted = false;
+  let ctx = null, master = null, musicGain = null, sfxGain = null, muted = true; // sound is off until a save turns it on (OPTION > SOUND)
   function init() {
     if (!hasAudio || ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = 0.55; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = muted ? 0 : 0.55; master.connect(ctx.destination);
     musicGain = ctx.createGain(); musicGain.gain.value = 0.32; musicGain.connect(master);
     sfxGain = ctx.createGain(); sfxGain.gain.value = 1.5; sfxGain.connect(master);
     const waves = {};

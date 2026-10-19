@@ -1,5 +1,6 @@
 // Balance check: fights each gym leader, Elite Four member and rival with a typical Gen 1 team, a greedy player (best
-// expected-damage move, no items) and all three starters. Compares the Gen 1-only ("vanilla") leader and Gen 2 swaps.
+// expected-damage move, no items) and all three starters. Compares the Gen 1-only ("vanilla") and Gen 1+2 ("no Gen 3")
+// versions of the trainer, and Gen 2/3 catches swapped into the player's team.
 // Usage: node tools/gymsim.js [runs per starter, default 20] [class prefix, e.g. BROCK or RIVAL]
 // PATCH='{"BROCK":{"SUDOWOODO":[10,["LOW_KICK","MIMIC"]]}}' tries a trainer level/moveset without editing the game.
 'use strict';
@@ -20,7 +21,7 @@ function trainerParty(cls, n, vanilla) {
     if (moves) { nm.moves = []; for (const id of moves) nm.addMove(id); }
     Object.assign(m, nm);
   }
-  return vanilla ? party.filter(m => D.species[m.species].dex <= 151) : party;
+  return vanilla ? party.filter(m => D.species[m.species].dex <= (vanilla === true ? 151 : vanilla)) : party;
 }
 function fight(cls, n, team, vanilla) {
   G.makeTrainerParty = (c, k) => trainerParty(c, k, vanilla);
@@ -52,20 +53,25 @@ function fight(cls, n, team, vanilla) {
 const STARTERS = { B: ['BULBASAUR', 'IVYSAUR', 'VENUSAUR'], C: ['CHARMANDER', 'CHARMELEON', 'CHARIZARD'], S: ['SQUIRTLE', 'WARTORTLE', 'BLASTOISE'] };
 const RIVAL_SLOT = { B: 3, C: 1, S: 2 }; // the rival's team index offset for your starter (pallet.js RIVAL_PICK)
 const stage = lv => (lv >= 36 ? 2 : lv >= 16 ? 1 : 0);
-// [class, party index (1-based for leaders, base index for rivals), starter level, rest of the team, Gen 2 swaps {label: [slot, [species, level]]}]
+// [class, party index (1-based for leaders, base index for rivals), starter level, rest of the team, Gen 2/3 swaps {label: [slot, [species, level]]}]
 const FIGHTS = [
-  ['BROCK', 1, 13, [['PIDGEY', 11], ['RATTATA', 11], ['NIDORAN_M', 11]], { MAREEP: [2, ['MAREEP', 11]], HOPPIP: [2, ['HOPPIP', 11]] }],
-  ['MISTY', 1, 21, [['PIDGEOTTO', 19], ['NIDORINO', 19], ['ODDISH', 18]], { SKIPLOOM: [2, ['SKIPLOOM', 19]], FLAAFFY: [2, ['FLAAFFY', 19]] }],
-  ['LT_SURGE', 1, 24, [['PIDGEOTTO', 22], ['NIDORINO', 22], ['DIGLETT', 22]], { QUAGSIRE: [2, ['QUAGSIRE', 22]], AZUMARILL: [2, ['AZUMARILL', 22]] }],
-  ['ERIKA', 1, 30, [['PIDGEOTTO', 28], ['NIDOKING', 28], ['GROWLITHE', 27]], { HOUNDOOM: [2, ['HOUNDOOM', 27]], YANMA: [2, ['YANMA', 27]] }],
-  ['KOGA', 1, 42, [['PIDGEOT', 40], ['NIDOKING', 40], ['DUGTRIO', 38]], { DONPHAN: [2, ['DONPHAN', 38]], FORRETRESS: [2, ['FORRETRESS', 38]] }],
-  ['SABRINA', 1, 43, [['PIDGEOT', 41], ['NIDOKING', 41], ['JOLTEON', 40]], { UMBREON: [2, ['UMBREON', 40]], HOUNDOOM: [2, ['HOUNDOOM', 40]], FORRETRESS: [2, ['FORRETRESS', 40]] }],
+  ['BROCK', 1, 13, [['PIDGEY', 11], ['RATTATA', 11], ['NIDORAN_M', 11]], { MAREEP: [2, ['MAREEP', 11]], HOPPIP: [2, ['HOPPIP', 11]], SHROOMISH: [2, ['SHROOMISH', 11]], SLAKOTH: [2, ['SLAKOTH', 11]] }],
+  ['MISTY', 1, 21, [['PIDGEOTTO', 19], ['NIDORINO', 19], ['ODDISH', 18]], { SKIPLOOM: [2, ['SKIPLOOM', 19]], FLAAFFY: [2, ['FLAAFFY', 19]], LOMBRE: [2, ['LOMBRE', 19]], SHROOMISH: [2, ['SHROOMISH', 19]] }],
+  ['LT_SURGE', 1, 24, [['PIDGEOTTO', 22], ['NIDORINO', 22], ['DIGLETT', 22]], { QUAGSIRE: [2, ['QUAGSIRE', 22]], AZUMARILL: [2, ['AZUMARILL', 22]], TRAPINCH: [2, ['TRAPINCH', 22]], NOSEPASS: [2, ['NOSEPASS', 22]], SHEDINJA: [2, ['SHEDINJA', 22]] }],
+  ['ERIKA', 1, 30, [['PIDGEOTTO', 28], ['NIDOKING', 28], ['GROWLITHE', 27]], { HOUNDOOM: [2, ['HOUNDOOM', 27]], YANMA: [2, ['YANMA', 27]], SWELLOW: [2, ['SWELLOW', 27]], COMBUSKEN: [2, ['COMBUSKEN', 27]] }],
+  ['KOGA', 1, 42, [['PIDGEOT', 40], ['NIDOKING', 40], ['DUGTRIO', 38]], { DONPHAN: [2, ['DONPHAN', 38]], FORRETRESS: [2, ['FORRETRESS', 38]], GRUMPIG: [2, ['GRUMPIG', 38]], SLAKING: [2, ['SLAKING', 38]] }],
+  ['SABRINA', 1, 43, [['PIDGEOT', 41], ['NIDOKING', 41], ['JOLTEON', 40]], { UMBREON: [2, ['UMBREON', 40]], HOUNDOOM: [2, ['HOUNDOOM', 40]], FORRETRESS: [2, ['FORRETRESS', 40]], MIGHTYENA: [2, ['MIGHTYENA', 40]], SHEDINJA: [2, ['SHEDINJA', 40]] }],
   ['BLAINE', 1, 46, [['PIDGEOT', 44], ['NIDOKING', 44], ['DUGTRIO', 42]], { QUAGSIRE: [2, ['QUAGSIRE', 42]], STEELIX: [2, ['STEELIX', 42]] }],
   ['GIOVANNI', 3, 49, [['PIDGEOT', 47], ['NIDOKING', 46], ['LAPRAS', 45]], { SKARMORY: [2, ['SKARMORY', 45]] }],
   ['LORELEI', 1, 56, [['PIDGEOT', 52], ['NIDOKING', 52], ['JOLTEON', 52]], { STEELIX: [0, ['STEELIX', 52]], SKARMORY: [0, ['SKARMORY', 52]] }],
   ['BRUNO', 1, 56, [['PIDGEOT', 52], ['NIDOKING', 52], ['JOLTEON', 52]], { STEELIX: [0, ['STEELIX', 52]], SKARMORY: [0, ['SKARMORY', 52]] }],
   ['AGATHA', 1, 56, [['PIDGEOT', 52], ['NIDOKING', 52], ['JOLTEON', 52]], { UMBREON: [2, ['UMBREON', 52]], STEELIX: [0, ['STEELIX', 52]] }],
   ['LANCE', 1, 58, [['PIDGEOT', 54], ['NIDOKING', 54], ['JOLTEON', 54]], { STEELIX: [0, ['STEELIX', 54]], SKARMORY: [0, ['SKARMORY', 54]] }],
+  ['SIDNEY', 1, 76, [['PIDGEOT', 72], ['NIDOKING', 72], ['JOLTEON', 72], ['LAPRAS', 72], ['SNORLAX', 72]], { METAGROSS: [0, ['METAGROSS', 72]], SALAMENCE: [0, ['SALAMENCE', 72]] }],
+  ['PHOEBE', 1, 76, [['PIDGEOT', 72], ['NIDOKING', 72], ['JOLTEON', 72], ['LAPRAS', 72], ['SNORLAX', 72]], { METAGROSS: [0, ['METAGROSS', 72]], ABSOL: [0, ['ABSOL', 72]] }],
+  ['GLACIA', 1, 76, [['PIDGEOT', 72], ['NIDOKING', 72], ['JOLTEON', 72], ['LAPRAS', 72], ['SNORLAX', 72]], { METAGROSS: [0, ['METAGROSS', 72]], HARIYAMA: [0, ['HARIYAMA', 72]] }],
+  ['DRAKE', 1, 76, [['PIDGEOT', 72], ['NIDOKING', 72], ['JOLTEON', 72], ['LAPRAS', 72], ['SNORLAX', 72]], { METAGROSS: [0, ['METAGROSS', 72]], SALAMENCE: [0, ['SALAMENCE', 72]] }],
+  ['STEVEN', 1, 78, [['PIDGEOT', 74], ['NIDOKING', 74], ['JOLTEON', 74], ['LAPRAS', 74], ['SNORLAX', 74]], { METAGROSS: [0, ['METAGROSS', 74]], SALAMENCE: [0, ['SALAMENCE', 74]] }],
   ['RIVAL1', 3, 10, [['PIDGEY', 8], ['RATTATA', 8]], {}],
   ['RIVAL1', 6, 19, [['PIDGEOTTO', 17], ['NIDORINO', 17], ['ODDISH', 16]], {}],
   ['RIVAL2', 0, 22, [['PIDGEOTTO', 19], ['NIDORINO', 19], ['DIGLETT', 18]], {}],
@@ -77,9 +83,10 @@ const pct = x => Math.round(x * 100) + '%';
 for (const [cls, n, slv, rest, swaps] of FIGHTS) {
   if (only && !cls.startsWith(only)) continue;
   const rival = /^RIVAL/.test(cls);
-  const variants = [['gen1 team', rest, false], ['gen1 team vs vanilla', rest, true]]
+  const variants = [['gen1 team', rest, false], ['gen1 team vs vanilla', rest, true], ['gen1 team vs no Gen 3', rest, 251]]
     .concat(Object.entries(swaps).map(([k, [i, m]]) => ['swap in ' + k, rest.map((x, j) => (j === i ? m : x)), false]));
   for (const [label, team, vanilla] of variants) {
+    if (vanilla && !trainerParty(cls, rival ? n + RIVAL_SLOT.B : n, vanilla).length) continue; // all-Gen 3 teams (Elite Four 3) have no older version
     let w = 0, hp = 0, ko = 0, stuck = 0; const by = {};
     for (const [k, line] of Object.entries(STARTERS)) {
       by[k] = 0;

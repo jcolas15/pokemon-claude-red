@@ -109,6 +109,15 @@
 .empty { padding: 14px; color: var(--muted); }
 .bar { height: 4px; border-radius: 2px; background: var(--sunk); grid-column: 1 / -1; overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--accent); }
+.monLink { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--blue); text-align: left; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.backLink { justify-self: start; background: var(--sunk); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: .86rem; font-weight: 700; color: var(--ink); cursor: pointer; }
+.monCard { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+.monCard h4 { margin: 0 0 6px; }
+.stats { display: grid; gap: 6px; margin: 0; }
+.stats > div { display: grid; grid-template-columns: 3em 2.5em 1fr; align-items: center; gap: 8px; }
+.stats dt { font-family: var(--font-pixel), monospace; font-size: .62rem; color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--font-pixel), monospace; font-size: .7rem; font-variant-numeric: tabular-nums; text-align: right; }
+.stats .bar { grid-column: auto; }
 
 .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .table { border-collapse: collapse; width: 100%; font-size: .92rem; }
@@ -118,3 +127,16 @@
 
 .footer { padding-block: 40px 0; color: var(--muted); font-size: .86rem; display: grid; gap: 6px; }
 @media (prefers-reduced-motion: no-preference) { :global(html):has(.page) { scroll-behavior: smooth; } }
+
+/* Kanto map (KantoMap.tsx) */
+.mapControls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.mapControls button { min-width: 40px; min-height: 40px; font-size: 20px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: inherit; }
+.mapControls button:disabled { opacity: 0.4; }
+.mapToggle { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; min-height: 32px; }
+.mapDot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #1b1a2e; display: inline-block; }
+.mapScroll { overflow: auto; max-height: 75vh; border: 1px solid var(--line); border-radius: 10px; background: #1c3a5a; touch-action: pan-x pan-y; }
+.mapMarker { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; border: 2px solid #1b1a2e; padding: 0; cursor: pointer; }
+.mapMarker:focus-visible { outline: 3px solid #fff; outline-offset: 1px; }
+.mapTown, .mapPlace { position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+.mapTown { background: #1b1a2ee6; color: #ffe890; font-weight: 700; }
+.mapPlace { background: #1b1a2ebf; color: #fff; font-size: 11px; }

@@ -152,13 +152,18 @@ const G = game();
   G.oakRating = function* (viaPC) {
     const seen = Object.keys(G.state.dex.seen).length, own = Object.keys(G.state.dex.caught).length;
     yield* G.say('POKéDEX comp' + 'letion is:\f' + seen + ' POKéMON seen\f' + own + ' POKéMON owned\fPROF.OAK\'s rating:');
-    // [owned below this, what OAK says]; the Gen 1 lines run to 150, then the Gen 2 range up to a complete 251
+    // [owned below this, what OAK says]; the Gen 1 lines run to 150, then the Gen 2 and Gen 3 ranges up to a complete 386
     const lines = ['You still have lots to do. Look for POKéMON in grassy areas!', 'You\'re on the right track! Get a FLASH HM from my AIDE!', 'You still need more POKéMON! Try to catch other species!', 'Good, you\'re trying hard! Get an ITEMFINDER from my AIDE!', 'Looking good! Go find my AIDE when you get 50!', 'You finally got at least 50 species! Be sure to get EXP.ALL from my AIDE!', 'Ho! This is getting even better!', 'Very good! Go fish for some marine POKéMON!', 'Wonderful! Do you like to collect things?', 'I\'m impressed! It must have been difficult to do!', 'You finally got at least 100 species! I can\'t believe how good you are!', 'You even have the evolved forms of POKéMON! Super!', 'Excellent! Trade with friends to get some more!', 'Outstanding! You\'ve become a real pro at this!', 'I have nothing left to say! You\'re the authority now!', 'Your POKéDEX is entirely complete! Congratulations!'];
     const tiers = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150].map((n, k) => [n, lines[k]]).concat([
       [175, 'POKéMON from far-off JOHTO are turning up all over KANTO! Keep looking!'],
       [200, 'Past 175! Have you found the POKéMON that roam the land?'],
       [225, 'Over 200 species! Even I haven\'t seen some of these!'],
-      [251, 'Only a handful left! The legends appear after the HALL OF FAME.'],
+      [251, 'JOHTO is nearly done! The legends appear after the HALL OF FAME.'],
+      [275, 'POKéMON from distant HOENN are here too! Try the water and the caves!'],
+      [300, 'Past 275! Some HOENN POKéMON only evolve with a special item.'],
+      [325, 'Over 300 species! You\'re catching up with me!'],
+      [350, 'Over 325! The HOENN POKéMON are starting to look familiar!'],
+      [386, 'Only a handful left! The rarest appear only after the HALL OF FAME.'],
       [Infinity, lines[15]]]);
     yield* G.say(tiers.find(t => own < t[0])[1]);
   };

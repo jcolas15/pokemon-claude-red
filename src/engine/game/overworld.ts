@@ -21,7 +21,7 @@ function newState() {
     map: 'RedsHouse2F', x: 3, y: 6, dir: 'up', lastOutdoor: 'PalletTown', lastOutdoorPos: null,
     flags: {}, toggles: {}, name: 'RED', rival: 'BLUE', money: 3000, party: [], boxes: [[]], box: 0,
     bag: [], pc: [{ id: 'POTION', n: 1 }], dex: { seen: {}, caught: {} }, badges: [], steps: 0, playTime: 0,
-    options: { textSpeed: 2, battleAnim: true, battleStyle: 'shift' }, coins: 0, lastHeal: null,
+    options: { textSpeed: 2, battleAnim: true, battleStyle: 'shift', mute: true }, coins: 0, lastHeal: null,
   };
 }
 G.newState = newState;
@@ -75,7 +75,7 @@ G.Actor = Actor;
 // ---------------- overworld scene ----------------
 class Overworld {
   constructor() {
-    this.opaque = true; this.tickBehind = true; this.t = 0; this.actors = []; this.player = null; this.map = null;
+    this.opaque = true; this.tall = true; this.tickBehind = true; this.t = 0; this.actors = []; this.player = null; this.map = null;
     this.locks = 0; this.lockIdle = 0; this.banner = null; this.fx = []; this.camOverride = null;
     this.shake = 0;
   }
@@ -214,7 +214,7 @@ class Overworld {
     const noStart = G.glitch && G.glitch.blocked(); // spotted by a trainer you escaped from: START and talking are off
     // mouse / touch: click a tile to walk there (or up to a person/sign/object and interact); right click = START
     if (Pt && Pt.rpressed) { Pt.consume(); this.autoPath = null; if (!noStart) { G.openStartMenu && G.openStartMenu(); return; } }
-    if (Pt && Pt.pressed && Pt.inside) { Pt.consume(); const [cx, cy] = this.camera(); this.planWalk(Math.floor((Pt.x + cx) / 16), Math.floor((Pt.y + cy) / 16)); }
+    if (Pt && Pt.pressed && Pt.inside) { Pt.consume(); const [cx, cy] = this.camera(), z = G.gfx.view.zoom; this.planWalk(Math.floor((160 + (Pt.x - 160) / z + cx) / 16), Math.floor((Pt.y / z + cy) / 16)); }
     if (I.pressed.start && !noStart) { G.openStartMenu && G.openStartMenu(); return; }
     if (I.pressed.select && G.onSelect) { G.onSelect(); return; }
     if (I.pressed.a) { this.interact(); return; }
@@ -451,22 +451,23 @@ class Overworld {
   // ---- rendering ----
   camera() {
     const p = this.player;
-    let cx = p.px + 8 - 160, cy = p.py + 8 - 90 - (p.jump ? 0 : 0);
-    if (this.camOverride) { cx = this.camOverride.x; cy = this.camOverride.y; }
+    const VH = G.gfx.view.mh; // taller in touch portrait (fewer rows when zoomed): same centre, more rows
+    let cx = p.px + 8 - 160, cy = p.py + 8 - VH / 2 - (p.jump ? 0 : 0);
+    if (this.camOverride) { cx = this.camOverride.x; cy = this.camOverride.y - (VH - 180) / 2; }
     if (this.shake > 0) { cx += Math.round((Math.random() - 0.5) * this.shake); cy += Math.round((Math.random() - 0.5) * this.shake); this.shake *= 0.9; if (this.shake < 0.5) this.shake = 0; }
     return [Math.round(cx), Math.round(cy)];
   }
   draw(s) {
     const [cx, cy] = this.camera();
     const R = this.render, mx = MR.MX * 16, my = MR.MY * 16;
-    if (!this.map.outdoor) s.clear(G.PAL.black);
-    MR.animate(R, this.t, cx + mx, cy + my, 320, 180);
+    if (!this.map.outdoor || s.h > 180) s.clear(G.PAL.black);
+    MR.animate(R, this.t, cx + mx, cy + my, s.w, s.h);
     MR.blitOpaque(s, R.s, -(cx + mx), -(cy + my));
     for (const n of this.neighbors) {
       if (!n.R) { n.R = MR.cache[n.map.name] || null; if (!n.R) { this.queueBuild(n); continue; } }
       const ox = n.c.ox * 16 - cx, oy = n.c.oy * 16 - cy;
-      if (ox > 320 || oy > 180 || ox + n.map.w * 16 < 0 || oy + n.map.h * 16 < 0) continue;
-      MR.animate(n.R, this.t, -ox + mx, -oy + my, 320, 180);
+      if (ox > s.w || oy > s.h || ox + n.map.w * 16 < 0 || oy + n.map.h * 16 < 0) continue;
+      MR.animate(n.R, this.t, -ox + mx, -oy + my, s.w, s.h);
       blitRegion(s, n.R.s, mx, my, n.map.w * 16, n.map.h * 16, ox, oy);
     }
     for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i]; if (!f.under) continue; if (f.draw(s, cx, cy, this.t) === false) this.fx.splice(i, 1); }
@@ -479,7 +480,7 @@ class Overworld {
     for (const n of this.neighbors) {
       if (!n.R) continue;
       const ox = n.c.ox * 16 - cx, oy = n.c.oy * 16 - cy;
-      if (ox > 320 || oy > 180 || ox + n.map.w * 16 < 0 || oy + n.map.h * 16 + 16 < 0) continue;
+      if (ox > s.w || oy > s.h || ox + n.map.w * 16 < 0 || oy + n.map.h * 16 + 16 < 0) continue;
       s.blit(n.R.up, ox, oy - 16, { sx: mx, sy: my - 16, sw: n.map.w * 16, sh: n.map.h * 16 + 16 });
     }
     if (R.interior) G.interior.drawOverlay(s, R, this.t, cx, cy, mx, my);
@@ -492,17 +493,22 @@ class Overworld {
         s.pset(mx0 + ax + sx * (i - k), my0 + ay + sy, o); s.pset(mx0 + ax + sx, my0 + ay + sy * (i - k), o);
       }
     }
-    for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i]; if (f.under) continue; if (f.draw(s, cx, cy, this.t) === false) this.fx.splice(i, 1); }
+    for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i]; if (f.under || f.hud) continue; if (f.draw(s, cx, cy, this.t) === false) this.fx.splice(i, 1); }
     if (G.ambient) G.ambient(s, this, cx, cy);
     MR.drawFires(s, R, -(cx + mx), -(cy + my), this.t);
     for (const n of this.neighbors) if (n.R) MR.drawFires(s, n.R, n.c.ox * 16 - cx - mx, n.c.oy * 16 - cy - my, this.t);
     if (G.ambientDark) G.ambientDark(s, this, cx, cy);
     if (this.poisonFlash > 0) { this.poisonFlash--; const d = s.data, k = this.poisonFlash % 3 === 0 ? 0.35 : 0.15; for (let i = 0; i < d.length; i++) d[i] = G.gfx.mix(d[i], 0xffb048a0, k); }
+    if (!this.hudOnTop) this.drawHud(s);
+  }
+  // screen-fixed overlays: the map-name banner and fx marked `hud` (money window, pop-up pictures, Safari counter)
+  drawHud(s) {
+    for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i]; if (f.hud && f.draw(s, 0, 0, this.t) === false) this.fx.splice(i, 1); }
     if (this.banner) this.drawBanner(s);
   }
   drawActor(s, a, cx, cy) {
     const x = a.px - cx, y = a.py - cy;
-    if (x < -24 || y < -32 || x > 340 || y > 200) return;
+    if (x < -24 || y < -32 || x > s.w + 20 || y > s.h + 20) return;
     let jy = 0;
     if (a.jump) { const t = a.prog / 32; jy = -Math.round(Math.sin(t * Math.PI) * 10); }
     // soft shadow
@@ -570,13 +576,15 @@ function* fadeOut(n, color) { G.fadeColor = color === undefined ? G.PAL.black : 
 function* fadeIn(n) { for (let i = n - 1; i >= 0; i--) { G.fadeLevel = i / n; yield; } G.fadeLevel = 0; }
 G.fadeOut = fadeOut; G.fadeIn = fadeIn;
 const prevPost = G.postDraw;
+G.fadeSurface = function (s) {
+  if (G.fadeLevel <= 0) return;
+  const lv = Math.round(G.fadeLevel * 6) / 6, d = s.data, c = G.fadeColor;
+  if (lv >= 1) { d.fill(c); return; }
+  for (let i = 0; i < d.length; i++) d[i] = G.gfx.mix(d[i], c, lv);
+};
 G.postDraw = function (s) {
   if (prevPost) prevPost(s);
-  if (G.fadeLevel > 0) {
-    const lv = Math.round(G.fadeLevel * 6) / 6, d = s.data, c = G.fadeColor;
-    if (lv >= 1) { d.fill(c); return; }
-    for (let i = 0; i < d.length; i++) d[i] = G.gfx.mix(d[i], c, lv);
-  }
+  G.fadeSurface(s);
 };
 
 // ---------------- script runner ----------------

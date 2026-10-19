@@ -36,6 +36,27 @@ G.receiveMon = function* (m, ui) {
 };
 
 // ---------------- move learning ----------------
+// type, power, accuracy and PP of the highlighted move and of the new one, beside the "forget which move?" list
+class MoveInfo {
+  constructor(m, mv) { this.m = m; this.mv = mv; this.sel = 0; }
+  update() {}
+  row(s, y, label, id, pp) {
+    const md = G.DATA.moves[id], F = G.font, c = hex(G.TYPE_COL[md.type] || '#888');
+    F.drawSmall(s, label, 16, y, hex('#7a7f96'));
+    G.ui.text(s, G.moveName(id), 16, y + 8);
+    s.rect(120, y + 9, 48, 10, P.outline); s.rect(121, y + 10, 46, 8, c);
+    const tn = G.typeName(md.type);
+    F.drawSmall(s, tn, 144 - F.measureSmall(tn) / 2, y + 11, P.white, G.gfx.shade(c, -0.4));
+    const stats = 'POW ' + (md.power > 1 ? md.power : '-') + '   ACC ' + (md.acc ? md.acc + '%' : '-') + '   PP ' + pp;
+    F.drawSmall(s, stats, 16, y + 24, hex('#3a3a4c'));
+  }
+  draw(s) {
+    G.ui.frame(s, 6, 40, 170, 84);
+    const old = this.m.moves[this.sel];
+    if (old) this.row(s, 46, 'FORGET', old.id, old.pp + '/' + old.max);
+    this.row(s, 84, 'NEW MOVE', this.mv, G.DATA.moves[this.mv].pp);
+  }
+}
 G.learnMoveFlow = function* (m, mv, ui) {
   const say = t => ui && ui.msg ? ui.msg(t) : G.say(t);
   const ask = q => ui && ui.askYesNo ? ui.askYesNo(q) : G.ask(q);
@@ -46,7 +67,10 @@ G.learnMoveFlow = function* (m, mv, ui) {
     yield* say(m.name + ' is trying to learn ' + mn + '!\fBut, ' + m.name + " can't learn more than 4 moves!");
     if (yield* ask('Delete an older move to make room for ' + mn + '?')) {
       yield* say('Which move should be forgotten?');
-      const r = yield* G.choose(m.moves.map(x => G.moveName(x.id)), { x: 180, y: 40 });
+      const info = new MoveInfo(m, mv);
+      G.engine.push(info);
+      const r = yield* G.choose(m.moves.map(x => G.moveName(x.id)), { x: 180, y: 40, onMove: i => { info.sel = i; } });
+      G.engine.pop(info);
       if (r >= 0) {
         const hm = G.DATA.hmMoves.includes(m.moves[r].id);
         if (hm) { yield* say('HM techniques can\'t be deleted!'); continue; }
@@ -109,10 +133,17 @@ G.evolve = function* (m, to, noCancel) {
   sc.show = 'to'; sc.flash = 1; sc.sil = 0;
   for (let i = 0; i < 30; i++) { for (let j = 0; j < 4; j++) { const a = Math.random() * Math.PI * 2; sc.parts.push({ x: 160, y: 62, vx: Math.cos(a) * 3, vy: Math.sin(a) * 3, life: 40, c: hex('#fff8c0') }); } yield; }
   G.cry && G.cry(to);
-  const oldName = m.name;
+  const oldName = m.name, extra = (m.sp.evos.find(e => e.to === to) || {}).extra;
   m.evolveTo(to);
   G.dexCaught(to);
   yield* say('Congratulations! Your ' + oldName + ' evolved into ' + G.speciesName(to) + '!');
+  // NINCADA: a SHEDINJA turns up too when there's room in the party, with the same level, DVs and moves
+  if (extra && G.state.party.length < 6) {
+    const shell = new G.Mon(extra, m.level, { dvs: Object.assign({}, m.dv), ot: m.ot, otId: m.otId });
+    shell.moves = m.moves.map(x => Object.assign({}, x));
+    G.state.party.push(shell); G.dexCaught(extra);
+    yield* say(G.speciesName(extra) + ' appeared in your party!');
+  }
   for (const mv of m.movesAtLevel(m.level)) yield* G.learnMoveFlow(m, mv, { msg: say, askYesNo: q => G.ask(q) });
   G.engine.pop(sc);
   return true;
@@ -243,10 +274,12 @@ G.startWildBattle = function* (species, level, opts) {
   return yield* runBattle(Object.assign({ type: 'wild', enemyParty: [m] }, opts || {}));
 };
 
-const LEADERS = { BROCK: 'BROCK', MISTY: 'MISTY', LT_SURGE: 'LT.SURGE', ERIKA: 'ERIKA', KOGA: 'KOGA', SABRINA: 'SABRINA', BLAINE: 'BLAINE', GIOVANNI: 'GIOVANNI', LORELEI: 'LORELEI', BRUNO: 'BRUNO', AGATHA: 'AGATHA', LANCE: 'LANCE', WILL: 'WILL', KAREN: 'KAREN' };
+const LEADERS = { BROCK: 'BROCK', MISTY: 'MISTY', LT_SURGE: 'LT.SURGE', ERIKA: 'ERIKA', KOGA: 'KOGA', SABRINA: 'SABRINA', BLAINE: 'BLAINE', GIOVANNI: 'GIOVANNI', LORELEI: 'LORELEI', BRUNO: 'BRUNO', AGATHA: 'AGATHA', LANCE: 'LANCE', WILL: 'WILL', KAREN: 'KAREN',
+  SIDNEY: 'SIDNEY', PHOEBE: 'PHOEBE', GLACIA: 'GLACIA', DRAKE: 'DRAKE', STEVEN: 'STEVEN' };
 const LONE_IDX = { BROCK: 1, MISTY: 2, LT_SURGE: 3, ERIKA: 4, KOGA: 5, BLAINE: 7, SABRINA: 6, GIOVANNI: 8 };
 const TRAINER_ITEMS = { MISTY: ['X_DEFEND'], LT_SURGE: ['X_SPEED'], ERIKA: ['SUPER_POTION'], KOGA: ['X_ATTACK'], SABRINA: ['HYPER_POTION'], BLAINE: ['SUPER_POTION'], GIOVANNI: ['GUARD_SPEC'],
-  LORELEI: ['SUPER_POTION'], BRUNO: ['X_DEFEND'], AGATHA: ['SUPER_POTION'], LANCE: ['HYPER_POTION'], RIVAL2: ['POTION'], RIVAL3: ['FULL_RESTORE'], WILL: ['SUPER_POTION'], KAREN: ['SUPER_POTION'] };
+  LORELEI: ['SUPER_POTION'], BRUNO: ['X_DEFEND'], AGATHA: ['SUPER_POTION'], LANCE: ['HYPER_POTION'], RIVAL2: ['POTION'], RIVAL3: ['FULL_RESTORE'], WILL: ['SUPER_POTION'], KAREN: ['SUPER_POTION'],
+  SIDNEY: ['HYPER_POTION'], PHOEBE: ['HYPER_POTION'], GLACIA: ['HYPER_POTION'], DRAKE: ['HYPER_POTION'], STEVEN: ['FULL_RESTORE'] };
 G.makeTrainerParty = function (cls, n) {
   const parties = G.DATA.parties[cls] || [];
   const custom = new Set();

@@ -345,7 +345,7 @@ G.scripts.onEnter = function (map) {
 // Steps/balls box shown next to the START menu while in the Safari (like Red).
 function safariHud() {
   if (G.ow.fx.some(f => f.safariHud)) return;
-  G.ow.fx.push({ safariHud: true, draw(s) {
+  G.ow.fx.push({ safariHud: true, hud: true, draw(s) {
     if (!inSafari() || !SAFARI_MAPS.test(G.ow.map.name)) return false;
     const top = G.engine.top();
     if (!(top && top.items && top.items.includes('OPTION') && top.items.includes('SAVE'))) return true;
@@ -746,7 +746,8 @@ cgTalk.CINNABARGYM_GYM_GUIDE = function* () { yield* say(S.flag('EVENT_BEAT_BLAI
 def('CinnabarGym', { enter() { cinnabarGates(); return null; }, talk: cgTalk });
 
 // ---------------- Cinnabar Lab: fossil revival, trades, TM35
-const FOSSILS = [['DOME_FOSSIL', 'KABUTO'], ['HELIX_FOSSIL', 'OMANYTE'], ['OLD_AMBER', 'AERODACTYL']];
+// G.FOSSILS so src/engine/scripts/gen3.ts can add the Root and Claw Fossils
+const FOSSILS = G.FOSSILS = [['DOME_FOSSIL', 'KABUTO'], ['HELIX_FOSSIL', 'OMANYTE'], ['OLD_AMBER', 'AERODACTYL']];
 function fossilNames() {
   const item = S.flag('LAB_FOSSIL_ITEM') ? G.state.flags.LAB_FOSSIL_ITEM : null, mon = G.state.flags.LAB_FOSSIL_MON;
   if (mon) setVar('wStringBuffer', G.speciesName(mon));
@@ -840,8 +841,9 @@ const E4 = {
   BrunosRoom: { id: 'BRUNOSROOM_BRUNO', cls: 'BRUNO', beat: 'EVENT_BEAT_BRUNOS_ROOM_TRAINER_0', auto: 'EVENT_AUTOWALKED_INTO_BRUNOS_ROOM', run: 'BrunosRoomBrunoDontRunAwayText', floor: 'floor_stone' },
   AgathasRoom: { id: 'AGATHASROOM_AGATHA', cls: 'AGATHA', beat: 'EVENT_BEAT_AGATHAS_ROOM_TRAINER_0', auto: 'EVENT_AUTOWALKED_INTO_AGATHAS_ROOM', run: 'AgathasRoomAgathaDontRunAwayText', floor: 'floor_tower' },
 };
-// after the first HALL OF FAME the rooms hold the Gen 2 ELITE FOUR instead (G.E4_2, src/engine/data/gen2_world.js)
-const run2 = name => (S.flag('EVENT_BEAT_CHAMPION') && G.E4_2 && G.E4_2[name]) || null;
+// after the first HALL OF FAME the rooms hold the Gen 2 ELITE FOUR (G.E4_2, src/engine/data/gen2_world.ts), and after
+// beating them the Hoenn ELITE FOUR (G.E4_3, src/engine/data/gen3_world.ts)
+const run2 = name => (S.flag('GEN2_BEAT_E4_2') && G.E4_3 && G.E4_3[name]) || (S.flag('EVENT_BEAT_CHAMPION') && G.E4_2 && G.E4_2[name]) || null;
 function wearRun2(name, id) { const r2 = run2(name), a = r2 && S.actor(id); if (a) a.sprite = r2.sprite; }
 function e4Door(name) {
   const c = E4[name], open = S.flag(c.beat);
@@ -925,7 +927,7 @@ function* lockLance() {
 }
 
 // ---------------- Champion (RIVAL3) and PROF.OAK
-// second run: LANCE is the CHAMPION; no PROF.OAK scene, straight on to the HALL OF FAME
+// later runs: LANCE, then STEVEN, is the CHAMPION; no PROF.OAK scene, straight on to the HALL OF FAME
 function* championLance(r2) {
   yield* settleIn();
   yield* walk('UUURU');
@@ -934,7 +936,7 @@ function* championLance(r2) {
   yield* say(r2.battle);
   const r = yield* S.battle(r2.cls, r2.n, { winText: G.fmt(S.t(r2.end)), music: 'final_battle', victory: 'victory_leader' });
   if (r !== 'win') return;
-  S.set('EVENT_BEAT_CHAMPION_RIVAL'); S.set('GEN2_BEAT_E4_2');
+  S.set('EVENT_BEAT_CHAMPION_RIVAL'); S.set(r2.flag || 'GEN2_BEAT_E4_2');
   yield* say(r2.after);
   if (yield* walk('LUUU')) { P().dir = 'up'; yield* takeWarp(); }
 }

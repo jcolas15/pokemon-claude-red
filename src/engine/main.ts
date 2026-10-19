@@ -9,6 +9,7 @@ G.param = param;
 G.startGame = function (st) {
   G.state = st || G.newState();
   if (G.applyLook) G.applyLook(G.state.look); // every new or loaded game wears its own look
+  if (G.audio) G.audio.setMute(G.state.options.mute !== false); // sound is off unless this save turned it on
   const ow = G.ow = new G.Overworld();
   G.engine.push(ow);
   ow.load(G.state.map, G.state.x, G.state.y, G.state.dir);
@@ -31,6 +32,7 @@ G.boot = function () {
     })(), 'wtp');
     return;
   }
+  if (!m && !window.HEADLESS && G.resume && G.resume.take()) return; // reopened within a day: back where you were (src/engine/game/resume.ts)
   if (G.titleScreen && !m && !window.HEADLESS) { (G.playIntro || G.titleScreen)(); return; }
   G.startGame(st);
   // dev helpers: ?battle=SPECIES&lv=N starts a wild battle with a sample party; ?hour=H forces time of day

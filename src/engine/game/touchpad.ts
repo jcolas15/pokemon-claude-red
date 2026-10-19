@@ -4,7 +4,8 @@ import { game } from '../global';
 const G = game();
 
 // On-screen controller for touch devices, and the page layout around the canvas.
-// Portrait lays the page out like a Game Boy: the screen sits at the top, with the D-pad, B/A and SELECT/START under it.
+// Portrait lays the page out like a Game Boy: the screen sits at the top, a little taller than a battle (the map
+// zoomed in, src/engine/core/gfx.ts view), with the D-pad, B/A and SELECT/START right under it.
 // Landscape splits it like a GBA: the D-pad and SELECT on the left of the screen, A/B and START on the right.
 // Buttons feed G.input.touchSet(). Mouse-and-keyboard browsers keep the engine's integer-scaled layout.
 // ?pad=1 / ?pad=0 forces the controller on or off.
@@ -25,12 +26,13 @@ function setup() {
   probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
   document.body.appendChild(probe);
   const insets = () => { const c = getComputedStyle(probe); return { t: parseFloat(c.paddingTop) || 0, r: parseFloat(c.paddingRight) || 0, b: parseFloat(c.paddingBottom) || 0, l: parseFloat(c.paddingLeft) || 0 }; };
+  const PORTRAIT_ROWS = 228; // game rows in portrait: battles (180) nearly fill it
   const put = (e, cx, cy, w, h) => { e.style.left = Math.round(cx - w / 2) + 'px'; e.style.top = Math.round(cy - h / 2) + 'px'; e.style.width = Math.round(w) + 'px'; e.style.height = Math.round(h) + 'px'; };
 
   // returns true when it placed the canvas itself (touch layouts); false leaves the desktop layout to the engine
   G.pageLayout = function (canvas) {
     pad.hidden = !G.touchUI;
-    if (!G.touchUI) { canvas.style.position = ''; if (disc) disc.style.bottom = ''; return false; }
+    if (!G.touchUI) { G.gfx.setViewHeight(G.gfx.H); canvas.style.position = ''; if (disc) disc.style.bottom = ''; return false; }
     // keep the layout still while the on-screen keyboard is up
     const ae = document.activeElement;
     if (ae && ae.tagName === 'INPUT' && canvas.style.position === 'fixed') return true;
@@ -39,20 +41,23 @@ function setup() {
     let x, y, w, h;
     pad.className = portrait ? 'portrait' : 'landscape';
     if (portrait) {
-      const top = sa.t + 6, need = 236; // the controller needs about this much height
-      w = vw - 12 - sa.l - sa.r; h = w * GH / GW;
-      if (top + h + need > vh - sa.b) { h = Math.max(GH, vh - sa.b - need - top); w = h * GW / GH; }
+      // one fixed layout: a screen a little taller than a battle (PORTRAIT_ROWS, the map zoomed in), controls right under it
+      const top = sa.t + 6, D = clamp(vw * 0.4, 110, 172), R = D * 0.38;
+      const controls = 12 + D + 34 + 11, room = vh - sa.b - 40 - top - controls;
+      w = vw - 12 - sa.l - sa.r;
+      const rows = Math.max(GH, Math.min(PORTRAIT_ROWS, room * GW / w));
+      G.gfx.setViewHeight(rows, G.gfx.MAP_ZOOM);
+      h = w * G.gfx.view.h / GW;
+      if (h > room) { h = room; w = h * GW / GH; G.gfx.setViewHeight(GH); }
       x = (vw - w) / 2; y = top;
-      const a0 = y + h + 12, a1 = vh - sa.b - 16, ah = a1 - a0;
-      const D = clamp(Math.min(ah - 70, vw * 0.4), 96, 172), R = D * 0.38;
-      const cy = a0 + Math.max(0, (ah - (D + 64)) * 0.42) + D / 2;
+      const cy = y + h + 12 + D / 2, py = cy + D / 2 + 34;
       put(dpad, sa.l + 14 + D / 2, cy, D, D);
       const ax = vw - sa.r - 16 - R * 0.62, ay = cy - R * 0.38;
       put(el('a'), ax, ay, R, R); put(el('b'), ax - R * 1.36, ay + R * 0.76, R, R);
-      const py = cy + D / 2 + 34;
       put(el('select'), vw / 2 - 42, py, 62, 22); put(el('start'), vw / 2 + 42, py, 62, 22);
       body.style.cssText = `left:0;right:0;top:${Math.round(y + h + 4)}px;bottom:0`;
     } else {
+      G.gfx.setViewHeight(GH);
       const side = clamp(vw * 0.2, 118, 210);
       const s = Math.min((vw - 2 * side - sa.l - sa.r) / GW, (vh - sa.t - sa.b - 8) / GH);
       w = GW * s; h = GH * s; x = (vw - w) / 2 + (sa.l - sa.r) / 2; y = (vh - h) / 2 + (sa.t - sa.b) / 2;

@@ -1,6 +1,6 @@
 // Grass encounters go through the glitch module's copy of Red's wild-data RAM (src/engine/game/glitches.ts). Gen 2
-// species have no Gen 1 index and once read back as 'M; they must come out as themselves, and about half the wild
-// should be Gen 2 (src/engine/data/gen2_world.ts).
+// species have no Gen 1 index and once read back as 'M; they must come out as themselves, and about two thirds of the wild
+// should be Gen 2 or Gen 3 (src/engine/data/gen2_world.ts, gen3_world.ts).
 import { it } from 'vitest';
 import { loadGame, check } from './helpers.js';
 
@@ -41,5 +41,5 @@ it('grass encounters give real Gen 2 POKéMON, never glitches', () => {
     if (w[k] && w[k].rate) shares.push(w[k].mons.reduce((a, [, sp], i) => a + (D.species[sp].dex > 151 ? pct[i] : 0), 0));
   }
   const avg = shares.reduce((a, b) => a + b, 0) / shares.length;
-  check(avg > 45 && avg < 55, `about half of wild encounters are Gen 2 (${avg.toFixed(0)}%)`);
+  check(avg > 55 && avg < 72, `about two thirds of wild encounters are Gen 2 or Gen 3 (${avg.toFixed(0)}%)`);
 });

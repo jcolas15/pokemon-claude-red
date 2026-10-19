@@ -48,6 +48,7 @@ const CLASS_CAST = {
   SCIENTIST: 'scientist', GIOVANNI: 'giovanni', ROCKET: 'rocket', COOLTRAINER_M: 'cooltrainer_m', COOLTRAINER_F: 'cooltrainer_f', BRUNO: 'bruno',
   BROCK: 'brock', MISTY: 'misty', LT_SURGE: 'surge', ERIKA: 'erika', KOGA: 'koga', BLAINE: 'blaine', SABRINA: 'sabrina', GENTLEMAN: 'gentleman',
   RIVAL2: 'blue', RIVAL3: 'blue', LORELEI: 'lorelei', CHANNELER: 'channeler', AGATHA: 'agatha', LANCE: 'lance', WILL: 'will', KAREN: 'karen',
+  SIDNEY: 'sidney', PHOEBE: 'phoebe', GLACIA: 'glacia', DRAKE: 'drake', STEVEN: 'steven',
 };
 // Gym leader looks (overworld sprites in Red share generic sprites; the portraits get unique palettes)
 const LEADER_CAST = ({
@@ -77,6 +78,11 @@ const PORTRAIT_LOOKS = {
   lance: { cape: '#2a2a3a', capeIn: '#c83a3a' },
   will: { body: 'suit', shades: true, tie: '#e8e0f0' },
   karen: { face: 'f', body: 'robe' },
+  sidney: { pose: 'cross', face: 'slit' },
+  phoebe: { face: 'f' },
+  glacia: { face: 'f', body: 'robe' },
+  drake: { face: 'old', beardStyle: 'mustache', pose: 'cross' },
+  steven: { body: 'suit', tie: '#c83a3a', accent: '#e8e8f0' },
   bruno: { pose: 'cross', face: 'slit' },
   youngster: { shorts: true },
   beauty: { face: 'f' },

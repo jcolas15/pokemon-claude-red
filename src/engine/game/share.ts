@@ -17,9 +17,11 @@ const URL_TEXT = host && host.length <= 16 ? host : 'levystreet.com'; // the car
 const GYMS = { BROCK: ['PewterGym', 0], MISTY: ['CeruleanGym', 1], LT_SURGE: ['VermilionGym', 2], ERIKA: ['CeladonGym', 3], KOGA: ['FuchsiaGym', 4], SABRINA: ['SaffronGym', 5], BLAINE: ['CinnabarGym', 6], GIOVANNI: ['ViridianGym', 7] };
 const GYM_TYPE = ['ROCK', 'WATER', 'ELECTRIC', 'GRASS', 'POISON', 'PSYCHIC_TYPE', 'FIRE', 'GROUND'];
 const small = t => String(t).toUpperCase().replace(/[éÉ]/g, 'E').replace(/·/g, '-');
-const ELITE = { LORELEI: '#5a90d8', BRUNO: '#9a7050', AGATHA: '#7a4a9a', LANCE: '#b84848', WILL: '#8a5ac8', KAREN: '#4a4a7a' };
-const LEGENDARY = new Set(['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'MEWTWO', 'MEW', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI']);
-const DEX_MILESTONES = [10, 25, 50, 75, 100, 125, 150, 151, 175, 200, 225, 250, 251];
+const ELITE = { LORELEI: '#5a90d8', BRUNO: '#9a7050', AGATHA: '#7a4a9a', LANCE: '#b84848', WILL: '#8a5ac8', KAREN: '#4a4a7a',
+  SIDNEY: '#5a4a4a', PHOEBE: '#7a5a9a', GLACIA: '#6aa0d0', DRAKE: '#4a6ab0', STEVEN: '#7a8aa8' };
+const LEGENDARY = new Set(['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'MEWTWO', 'MEW', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI',
+  'REGIROCK', 'REGICE', 'REGISTEEL', 'LATIAS', 'LATIOS', 'KYOGRE', 'GROUDON', 'RAYQUAZA', 'JIRACHI', 'DEOXYS']);
+const DEX_MILESTONES = [10, 25, 50, 75, 100, 125, 150, 151, 175, 200, 225, 250, 251, 275, 300, 325, 350, 375, 386];
 const trainerName = cls => ({ LT_SURGE: 'LT.SURGE', RIVAL1: G.state.rival, RIVAL2: G.state.rival, RIVAL3: G.state.rival })[cls] || cls.replace(/_/g, ' ');
 const monName = sp => G.speciesName ? G.speciesName(sp) : sp;
 const playTime = t => { const m = Math.floor((t || 0) / 3600); return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); };
@@ -51,7 +53,7 @@ G.achievementTitle = function (a) {
     case 'caught': return [n + ' CAUGHT' + (LEGENDARY.has(d.sp) ? ' THE LEGENDARY' : ''), monName(d.sp) + '!', 'LV' + d.lv + ' · No.' + String(d.dex).padStart(3, '0') + (d.place ? ' · ' + d.place : '')];
     case 'got': return [n + ' RECEIVED', monName(d.sp) + '!', 'LV' + d.lv + ' · No.' + String(d.dex).padStart(3, '0')];
     case 'evolved': return [monName(d.from) + ' EVOLVED INTO', monName(d.sp) + '!', n + "'S TEAM GETS STRONGER"];
-    case 'dex': return [n + ' HAS CAUGHT', d.n + ' POKéMON!', d.n >= 251 ? 'THE POKéDEX IS COMPLETE!' : 'POKéDEX ' + d.n + '/251'];
+    case 'dex': return [n + ' HAS CAUGHT', d.n + ' POKéMON!', d.n >= G.DATA.dexOrder.length - 1 ? 'THE POKéDEX IS COMPLETE!' : 'POKéDEX ' + d.n + '/' + (G.DATA.dexOrder.length - 1)];
     case 'hof': return [n + ' ENTERED THE', 'HALL OF FAME!', 'WITH ' + d.team.map(t => monName(t.species)).slice(0, 3).join(', ') + (d.team.length > 3 ? '...' : '')];
     case 'card': return [n + "'S", 'ADVENTURE', a.badges + ' BADGES · ' + a.dex + ' CAUGHT'];
     case 'tower': return [n + ' WON', d.n + ' IN A ROW!', 'BATTLE TOWER STREAK · SOCIAL ZONE'];
@@ -274,7 +276,7 @@ G.shareCard = function (a) {
     for (let i = 0; i < 3; i++) for (let k = 0; k < 5; k++) for (let j = -k; j <= k; j++) { s.pset(188 + i * 6 + (4 - k), 118 + j, hex('#b8f0c8')); s.pset(206 - i * 6 - (4 - k), 132 + j, hex('#b8f0c8')); }
     sprite(s, d.sp, 96, 256, 172);
   } else if (a.kind === 'card') {
-    G.BADGES.forEach((b, i) => { const tmp = new Surface(16, 16); G.drawBadge(tmp, i, 0, 0, G.state.badges.includes(b)); s.blitScaled(tmp, 150 + (i % 4) * 40, 90 + Math.floor(i / 4) * 36, 30, 30); });
+    G.BADGES.forEach((b, i) => { const tmp = new Surface(18, 18); G.drawBadge(tmp, i, 1, 1, G.state.badges.includes(b)); s.blitScaled(tmp, 148 + (i % 4) * 40, 88 + Math.floor(i / 4) * 36, 34, 34); });
   }
   // footer: progress and the site
   s.rect(138, 166, 182, 14, hex('#120c22'));
@@ -345,7 +347,7 @@ G.decodeMoment = function (enc) {
   for (const k of ['sp', 'from', 'ace']) if (spOk(d[k])) data[k] = d[k];
   if (G.BADGES.includes(d.badge)) data.badge = d.badge;
   if (d.gym !== undefined) data.gym = numOk(d.gym, 7);
-  for (const k of ['lv', 'dex', 'n']) if (d[k] !== undefined) data[k] = numOk(d[k], k === 'n' ? 251 : 255);
+  for (const k of ['lv', 'dex', 'n']) if (d[k] !== undefined) data[k] = numOk(d[k], k === 'n' ? G.DATA.dexOrder.length - 1 : 255);
   if (d.place) data.place = String(d.place).toUpperCase().replace(/[^A-Z0-9 .\-'É]/g, '').slice(0, 24);
   if (Array.isArray(d.recent)) data.recent = d.recent.filter(spOk).slice(0, 6);
   if (Array.isArray(d.team)) data.team = a.kind === 'hof' ? d.team.filter(m => m && spOk(m.species)).slice(0, 6).map(m => ({ species: m.species, level: numOk(m.level, 100) })) : d.team.filter(spOk).slice(0, 6);

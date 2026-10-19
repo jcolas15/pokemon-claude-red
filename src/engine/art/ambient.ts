@@ -33,6 +33,7 @@ G.timeOfDay = function () {
   return { night: Math.max(0, Math.min(1, night)), dusk };
 };
 function dayNight(s, ow, cx, cy) {
+  VH = s.h;
   if (!ow.map.outdoor && ow.map.tsFile !== 'forest') return;
   const td = G.timeOfDay(); if (td.night <= 0.01 && td.dusk <= 0.01) return;
   const d = s.data;
@@ -46,10 +47,10 @@ function dayNight(s, ow, cx, cy) {
   if (td.night > 0.3) {
     const R = ow.render, a = Math.min(1, (td.night - 0.3) * 1.6);
     // light pools: max-combined radial falloff in a light buffer, quantised to 4 dithered steps (no stacked rings)
-    let any = false; LY0 = 180; LY1 = -1; LX0 = 320; LX1 = -1;
+    let any = false; LY0 = VH; LY1 = -1; LX0 = 320; LX1 = -1;
     const collect = (L, ox, oy) => {
       for (const l of L) {
-        const x = l.x - ox, y = l.y - oy; if (x < -34 || y < -30 || x > 354 || y > 210) continue;
+        const x = l.x - ox, y = l.y - oy; if (x < -34 || y < -30 || x > 354 || y > VH + 30) continue;
         any = true;
         if (l.k === 'fire') splat(x, y + 8, 30, 18, 0.95 + 0.05 * Math.sin(ow.t * 0.23 + l.x), LIGHT_COL.fire);
         else splat(x, y + 6, 20, 12, 0.8, LIGHT_COL[l.k] || LIGHT_COL.def);
@@ -75,11 +76,12 @@ function dayNight(s, ow, cx, cy) {
     }
   }
 }
-const LBUF = new Float32Array(320 * 180), LCOL = new Uint32Array(320 * 180); let LY0 = 180, LY1 = -1, LX0 = 320, LX1 = -1;
+// sized for the tallest view (touch portrait shows more of the map; src/engine/core/gfx.ts view)
+const LBUF = new Float32Array(320 * 512), LCOL = new Uint32Array(320 * 512); let LY0 = 180, LY1 = -1, LX0 = 320, LX1 = -1, VH = 180;
 const BAY = new Float32Array(16); for (let k = 0; k < 16; k++) BAY[k] = bayer(k & 3, k >> 2);
 const LIGHT_COL = { sign_poke: hex('#ff9a9a'), sign_mart: hex('#a8c8ff'), fire: hex('#ff9a48'), def: hex('#ffd48a') };
 function splat(x0, y0, rx, ry, k, col) {
-  const xa = Math.max(0, Math.floor(x0 - rx)), xb = Math.min(319, Math.ceil(x0 + rx)), ya = Math.max(0, Math.floor(y0 - ry)), yb = Math.min(179, Math.ceil(y0 + ry));
+  const xa = Math.max(0, Math.floor(x0 - rx)), xb = Math.min(319, Math.ceil(x0 + rx)), ya = Math.max(0, Math.floor(y0 - ry)), yb = Math.min(VH - 1, Math.ceil(y0 + ry));
   if (ya < LY0) LY0 = ya; if (yb > LY1) LY1 = yb; if (xa < LX0) LX0 = xa; if (xb > LX1) LX1 = xb;
   for (let y = ya; y <= yb; y++) {
     const dy = (y + 0.5 - y0) / ry, dy2 = dy * dy; if (dy2 >= 1) continue;
@@ -100,14 +102,14 @@ G.ambient = function (s, ow, cx, cy) {
   }
 };
 G.ambientInner = function (s, ow, cx, cy) {
-  const m = ow.map, e = env(m), t = ow.t;
+  const m = ow.map, e = env(m), t = ow.t, H = s.h;
   if (state.map !== m.name) { state = { map: m.name, parts: [], env: e }; }
   const d = s.data;
   // --- cloud shadows (outdoors) ---
   if ((e === 'outdoor' || e === 'safari' || e === 'lavender') && G.timeOfDay().night < 0.5) {
     const ox = Math.floor(t * 0.18), oy = Math.floor(t * 0.07);
     const nd = N.big.data, nm = N.big.mask, ns = N.big.size;
-    for (let y = 0; y < 180; y++) {
+    for (let y = 0; y < H; y++) {
       const row = ((((cy + y) >> 2) + oy) & nm) * ns;
       for (let x = 0; x < 320; x++) {
         const v = nd[row + ((((cx + x) >> 2) + ox) & nm)];
@@ -123,20 +125,20 @@ G.ambientInner = function (s, ow, cx, cy) {
   const spawn = (o) => parts.push(Object.assign({ x: 0, y: 0, vx: 0, vy: 0, life: 200, age: 0 }, o));
   const nightNow = G.timeOfDay().night;
   if ((e === 'outdoor' || e === 'safari' || e === 'forest') && nightNow > 0.5 && parts.length < 14 && t % 20 === 0) {
-    spawn({ kind: 'firefly', x: cx + rand(0, 320), y: cy + rand(0, 180), life: 360, ph: rand(0, 6) });
+    spawn({ kind: 'firefly', x: cx + rand(0, 320), y: cy + rand(0, H), life: 360, ph: rand(0, 6) });
   } else if ((e === 'outdoor' || e === 'safari') && nightNow < 0.5 && parts.length < 6 && t % 40 === 0 && Math.random() < 0.6) {
     // butterflies near flowers/grass
-    spawn({ kind: 'fly', x: cx + rand(20, 300), y: cy + rand(20, 160), life: 400, c: [hex('#f8f8f8'), hex('#f8d850'), hex('#f898c8')][Math.floor(rand(0, 3))], ph: rand(0, 6) });
+    spawn({ kind: 'fly', x: cx + rand(20, 300), y: cy + rand(20, H - 20), life: 400, c: [hex('#f8f8f8'), hex('#f8d850'), hex('#f898c8')][Math.floor(rand(0, 3))], ph: rand(0, 6) });
   }
   if (e === 'forest' || e === 'safari') {
     if (t % 14 === 0 && parts.length < 30) spawn({ kind: 'leaf', x: cx + rand(-20, 340), y: cy - 10, vx: rand(0.1, 0.5), vy: rand(0.25, 0.55), life: 500, ph: rand(0, 6), c: [P.leaf[5], P.leaf[6], hex('#d8b048')][Math.floor(rand(0, 3))] });
   }
   if (e === 'cave' || e === 'mansion') {
-    if (t % 10 === 0 && parts.length < 40) spawn({ kind: 'dust', x: cx + rand(0, 320), y: cy + rand(0, 180), vx: rand(-0.1, 0.1), vy: rand(-0.12, -0.02), life: 240, c: hex('#e8d8b8') });
+    if (t % 10 === 0 && parts.length < 40) spawn({ kind: 'dust', x: cx + rand(0, 320), y: cy + rand(0, H), vx: rand(-0.1, 0.1), vy: rand(-0.12, -0.02), life: 240, c: hex('#e8d8b8') });
   }
   if (e === 'ice') { if (t % 6 === 0 && parts.length < 50) spawn({ kind: 'snow', x: cx + rand(-20, 340), y: cy - 6, vx: rand(-0.3, 0.1), vy: rand(0.3, 0.7), life: 400, ph: rand(0, 6), c: hex('#f4faff') }); }
-  if (e === 'tower' || e === 'lavender') { if (t % 30 === 0 && parts.length < 10) spawn({ kind: 'wisp', x: cx + rand(0, 320), y: cy + rand(40, 180), vx: rand(-0.15, 0.15), vy: rand(-0.35, -0.15), life: 260, ph: rand(0, 6), c: hex('#c8b0f8') }); }
-  if (e === 'power') { if (t % 25 === 0 && Math.random() < 0.6) spawn({ kind: 'spark', x: cx + rand(0, 320), y: cy + rand(0, 180), life: 10, c: hex('#fff8a0') }); }
+  if (e === 'tower' || e === 'lavender') { if (t % 30 === 0 && parts.length < 10) spawn({ kind: 'wisp', x: cx + rand(0, 320), y: cy + rand(40, H), vx: rand(-0.15, 0.15), vy: rand(-0.35, -0.15), life: 260, ph: rand(0, 6), c: hex('#c8b0f8') }); }
+  if (e === 'power') { if (t % 25 === 0 && Math.random() < 0.6) spawn({ kind: 'spark', x: cx + rand(0, 320), y: cy + rand(0, H), life: 10, c: hex('#fff8a0') }); }
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i]; p.age++;
     if (p.age > p.life) { parts.splice(i, 1); continue; }
@@ -176,7 +178,7 @@ G.ambientInner = function (s, ow, cx, cy) {
     const fr = 0xb8, fg = 0xa8, fb = 0xd0;
     const nd = N.big.data, nm = N.big.mask, ns = N.big.size;
     const tx = t >> 2, ty = t >> 3;
-    for (let y = 0; y < 180; y++) {
+    for (let y = 0; y < H; y++) {
       const ny = ((((cy + y) >> 1) + ty) & nm) * ns;
       for (let x = 0; x < 320; x++) {
         const i = y * 320 + x, c = d[i];
@@ -189,10 +191,10 @@ G.ambientInner = function (s, ow, cx, cy) {
   }
   if (e === 'cave' || e === 'tower' || e === 'mansion' || e === 'ice') {
     // soft vignette
-    const cxp = 160, cyp = 90, strength = e === 'tower' ? 0.75 : 0.5, dark = e === 'ice' ? hex('#20304a') : hex('#0d0a12');
+    const cxp = 160, cyp = H / 2, ry = 120 * H / 180, strength = e === 'tower' ? 0.75 : 0.5, dark = e === 'ice' ? hex('#20304a') : hex('#0d0a12');
     const dr = dark & 255, dg = (dark >>> 8) & 255, db = (dark >>> 16) & 255;
-    for (let y = 0; y < 180; y++) {
-      const yy = (y - cyp) / 120;
+    for (let y = 0; y < H; y++) {
+      const yy = (y - cyp) / ry;
       for (let x = 0; x < 320; x++) {
         const xx = (x - cxp) / 190, r2 = xx * xx + yy * yy;
         if (r2 < 0.3844) continue;

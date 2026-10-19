@@ -304,7 +304,7 @@ class BattleScene {
       this.box = { lines: F.wrap('What will ' + m.name + ' do?', 150), chars: 999, waiting: false };
       const act = yield* this.gridMenu(items, this.lastAction || 0);
       if (act < 0) continue;
-      this.lastAction = act;
+      this.lastAction = act === 3 ? 0 : act; // never reopen on RUN, so mashing A can't flee by accident
       if (b.safari) return { type: 'safari', what: ['ball', 'bait', 'rock', 'run'][act] };
       if (act === 0) {
         const slot = yield* this.moveMenu(b);
@@ -336,6 +336,7 @@ class BattleScene {
           const cx = x + 18 + (i % 2) * 58, cy = y + 8 + Math.floor(i / 2) * 15;
           G.ui.text(s, it, cx, cy);
           if (i === menu.sel) G.ui.cursor(s, cx - 10, cy, self.t);
+          else if (i === menu.swap) F.draw(s, '▶', cx - 10, cy, hex('#9a9aa8'));
         });
       },
     };
@@ -344,25 +345,26 @@ class BattleScene {
       const I = G.input, Pt = G.pointer;
       if (Pt && (Pt.moved || Pt.pressed) && Pt.inside) { // hover/tap a cell; the click arrives as A
         const i = items.findIndex((_, k) => Pt.in(186 + 8 + (k % 2) * 58, 136 + 6 + Math.floor(k / 2) * 15, 58, 15));
-        if (i >= 0) menu.sel = i; else if (Pt.pressed) Pt.consume();
+        if (i === 3 && menu.sel !== 3 && Pt.pressed) { menu.sel = 3; Pt.consume(); } // RUN takes a second tap
+        else if (i >= 0) menu.sel = i; else if (Pt.pressed) Pt.consume();
       }
       if (I.pressed.left || I.pressed.right) { menu.sel ^= 1; if (G.sfx) G.sfx('cursor'); }
       if (I.pressed.up || I.pressed.down) { menu.sel ^= 2; if (G.sfx) G.sfx('cursor'); }
       if (I.pressed.a) { if (G.sfx) G.sfx('select'); this.menu = null; return menu.sel; }
-      if (I.pressed.b) { menu.sel = 3; }
     }
   }
   *moveMenu(b) {
     const moves = b.moveList(b.p);
     const self = this;
     const menu = this.menu = {
-      kind: 'moves', sel: Math.min(this.lastMove || 0, moves.length - 1),
+      kind: 'moves', sel: Math.min(this.lastMove || 0, moves.length - 1), swap: -1,
       draw(s) {
         G.ui.frame(s, 3, 136, 214, 42, 'gray');
         moves.forEach((mv, i) => {
           const cx = 20 + (i % 2) * 100, cy = 144 + Math.floor(i / 2) * 15;
           G.ui.text(s, G.moveName(mv.id), cx, cy);
           if (i === menu.sel) G.ui.cursor(s, cx - 10, cy, self.t);
+          else if (i === menu.swap) F.draw(s, '▶', cx - 10, cy, hex('#9a9aa8'));
         });
         const mv = moves[menu.sel], md = G.DATA.moves[mv.id];
         G.ui.frame(s, 220, 136, 96, 42, 'gray');
@@ -386,7 +388,13 @@ class BattleScene {
       if (I.pressed.right && menu.sel % 2 === 0 && menu.sel + 1 < n) menu.sel++;
       if (I.pressed.up && menu.sel >= 2) menu.sel -= 2;
       if (I.pressed.down && menu.sel + 2 < n) menu.sel += 2;
+      if (I.pressed.select) {
+        if (menu.swap >= 0 && menu.swap !== menu.sel) b.swapMoves(b.p, menu.swap, menu.sel);
+        menu.swap = menu.swap < 0 ? menu.sel : -1;
+        if (G.sfx) G.sfx('cursor');
+      }
       if (I.pressed.a) { this.menu = null; this.lastMove = menu.sel; if (G.sfx) G.sfx('select'); return menu.sel; }
+      if (I.pressed.b && menu.swap >= 0) { menu.swap = -1; continue; }
       if (I.pressed.b) { this.menu = null; return -1; }
     }
   }

@@ -6,7 +6,7 @@ const G = game();
 // Builds pre-rendered static layers for a map and animates water / grass / flowers in place.
 const { Surface, hash2 } = G.gfx;
 const T = G.terrain, P = G.PAL;
-const MX = 11, MY = 7;
+const MX = 11, MY = 15; // MY covers half of the tallest touch-portrait view (gfx.ts MAX_VIEW_H) past a map's edge
 const MATOF = { grass: 1, path: 2, sand: 3, pave: 4, water: 5, rock: 6, floor: 7 };
 const DEFAULT_GROUND = {
   tree: 'grass', tree2: 'grass', cut_tree: 'grass', fence: 'path', sign: 'path', ledge_d: 'grass', ledge_l: 'grass', ledge_r: 'grass',

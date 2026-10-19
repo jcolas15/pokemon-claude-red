@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import s from "./guide.module.css";
 
-export type Mon = { name: string; level: number; types: string[]; moves: string[]; gen2: boolean };
+export type Mon = { name: string; level: number; types: string[]; moves: string[]; gen: number };
 export type Trainer = { team: Mon[]; weakTo: string[] };
 
 // POKéMON names are stored the Game Boy way (PIKACHU); the guide sets them in title case
@@ -12,8 +12,8 @@ export function Type({ t }: { t: string }) {
   return <span className={s.t} data-type={t}>{t}</span>;
 }
 
-export function Gen2Tag() {
-  return <span className={s.gen2}>GEN 2</span>;
+export function GenTag({ gen }: { gen: number }) {
+  return <span className={s.gen2}>GEN {gen}</span>;
 }
 
 export function Team({ team }: { team: Mon[] }) {
@@ -25,7 +25,7 @@ export function Team({ team }: { team: Mon[] }) {
         <div key={i} className={`${s.mon} ${i === ace ? s.ace : ""}`}>
           <span className={s.monLv}>Lv {m.level}</span>
           <span className={s.monName}>
-            {title(m.name)} {m.types.map((t) => <Type key={t} t={t} />)} {m.gen2 && <Gen2Tag />}
+            {title(m.name)} {m.types.map((t) => <Type key={t} t={t} />)} {m.gen > 1 && <GenTag gen={m.gen} />}
           </span>
           <span className={s.moves}>{m.moves.map(title).join(" · ")}</span>
         </div>

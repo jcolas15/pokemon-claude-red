@@ -7,10 +7,11 @@ const G = game();
 // and in-game trades. Gifts, items and legendaries: src/engine/scripts/gen2.js.
 const D = G.DATA;
 
-// Wild areas: each lists its Gen 2 species, most common first and the rare one last. About half of every area's
-// encounter odds go to them. Slot 0 (the area's staple) and any Gen 1 species already at 5% or less stay as in Red, and
-// every Gen 1 species keeps a slot in its area unless that holds the area under 40% and it can be caught elsewhere. Each Gen 2 species takes
-// the stage its slot's level has reached. With three or more in a list, the last only gets the area's rarest slot.
+// Wild areas: each lists its Gen 2 species, most common first and the rare one last. src/engine/data/gen3_world.ts mixes
+// these with the Gen 3 lists through G.mixWild below, so about a third of every area's encounter odds go to each
+// generation. Slot 0 (the area's staple) and any Gen 1 species already at 5% or less stay as in Red, and every Gen 1
+// species keeps a slot in its area unless that holds the area too low and it can be caught elsewhere. Each species takes
+// the stage its slot's level has reached. With three or more in a list, the last only gets that generation's rarest slot.
 const WILD = {
   ROUTE_1: ['SENTRET', 'HOOTHOOT'], ROUTE_22: ['MAREEP', 'SENTRET'], ROUTE_2: ['LEDYBA', 'SPINARAK', 'HOOTHOOT', 'PINECO'],
   VIRIDIAN_FOREST: ['SPINARAK', 'LEDYBA', 'PINECO'], ROUTE_3: ['HOPPIP', 'MAREEP', 'SUNKERN'],
@@ -45,33 +46,38 @@ const wildCount = {}; // tables each species can be met in, so none of Red's dis
 for (const w of Object.values(D.wild)) for (const kind of ['grass', 'water']) {
   if (w[kind] && w[kind].rate) for (const sp of new Set(w[kind].mons.map(m => m[1]))) wildCount[sp] = (wildCount[sp] || 0) + 1;
 }
-function addGen2(mons, pool) {
-  const pct = D.slotChances.map(c => (c / 256) * 100);
+// one list per generation (Gen 2, then Gen 3); each picked slot goes to whichever generation has less of the area so far
+function mixWild(mons, pools) {
+  const pct = D.slotChances.map(c => (c / 256) * 100), goal = pools.length > 1 ? 64 : 48, floor = pools.length > 1 ? 55 : 40;
   const share = sp => mons.reduce((a, [, s], i) => a + (s === sp ? pct[i] : 0), 0);
   const protectedSp = new Set(mons.map(([, s]) => s).filter(s => share(s) <= 5.5));
   const left = {}; for (const [, s] of mons) left[s] = (left[s] || 0) + 1;
   const picked = []; let total = 0;
-  // first every Gen 1 species keeps a slot here; only an area that stays under 40% that way lets some go
+  // first every Gen 1 species keeps a slot here; only an area that stays under the floor that way lets some go
   for (const strict of [true, false]) for (const i of SLOT_PREFERENCE) {
-    if (total >= 48 || (!strict && total >= 40) || picked.includes(i)) continue;
+    if (total >= goal || (!strict && total >= floor) || picked.includes(i)) continue;
     const sp = mons[i][1];
     if (protectedSp.has(sp) || (left[sp] < 2 && (strict || wildCount[sp] < 2))) continue;
     if (--left[sp] === 0) wildCount[sp]--;
     picked.push(i); total += pct[i];
   }
-  // the rarest picked slot gets the pool's last (rare) species; the rest alternate through the others
   picked.sort((a, b) => pct[b] - pct[a]);
-  const rare = pool.length >= 3, main = rare ? pool.slice(0, -1) : pool;
-  picked.forEach((i, n) => {
-    const sp = rare && n === picked.length - 1 ? pool[pool.length - 1] : main[n % main.length];
-    mons[i] = [mons[i][0], stageAt(sp, mons[i][0])];
+  const slots = pools.map(() => []), got = pools.map(() => 0);
+  for (const i of picked) { const g = got.indexOf(Math.min(...got)); slots[g].push(i); got[g] += pct[i]; }
+  // within a generation, its rarest slot gets the list's last (rare) species; the rest alternate through the others
+  pools.forEach((pool, g) => {
+    const rare = pool.length >= 3, main = rare ? pool.slice(0, -1) : pool;
+    slots[g].forEach((i, n) => {
+      const sp = rare && n === slots[g].length - 1 ? pool[pool.length - 1] : main[n % main.length];
+      mons[i] = [mons[i][0], stageAt(sp, mons[i][0])];
+    });
   });
 }
-for (const [cnst, spec] of Object.entries(WILD)) {
-  for (const [kind, pool] of Object.entries(Array.isArray(spec) ? { grass: spec } : spec)) addGen2(D.wild[cnst][kind].mons, pool);
-}
-// the one wild Larvitar: 1% on Cerulean Cave 1F, unevolved (Victory Road's slots are high enough to be Pupitar)
-D.wild.CERULEAN_CAVE_1F.grass.mons[9] = [D.wild.CERULEAN_CAVE_1F.grass.mons[9][0], 'LARVITAR'];
+G.WILD_GEN2 = WILD;
+G.mixWild = mixWild;
+// the one wild Larvitar: 1% on Cerulean Cave 1F, unevolved (Victory Road's slots are high enough to be Pupitar);
+// applied by gen3_world.ts after mixing
+G.WILD_PINS = [['CERULEAN_CAVE_1F', 'grass', 9, 'LARVITAR']];
 // Super Rod: each spot picks at random from its list, at the list's level
 const ROD = { CHINCHOU: ['ROUTE_19', 'ROUTE_20', 'ROUTE_21', 'CINNABAR_ISLAND'], REMORAID: ['ROUTE_12', 'ROUTE_13', 'ROUTE_17', 'ROUTE_18'],
   QWILFISH: ['ROUTE_12', 'ROUTE_13', 'VERMILION_CITY', 'VERMILION_DOCK'] };
@@ -82,6 +88,7 @@ function stageAt(sp, lv) {
   for (let e; (e = D.species[sp].evos.find(x => x.type === 'level' && lv >= x.level));) sp = e.to;
   return sp;
 }
+G.stageAt = stageAt;
 
 // gym leaders: one type-matching Gen 2 POKéMON, slotted in before the ace (the ace keeps the leader's TM move).
 // Brock's Sudowoodo trades Rock Throw for Low Kick: with it, a Charmander start almost never beat him (Phase 7 sims).

@@ -1,0 +1,218 @@
+// POKéMON drawings, Gen 3 #252-261. Format: art/mondef.ts.
+import { defMon } from '../../art/mondef';
+
+// @TREECKO
+defMon('TREECKO', { pal: { body: '#78bf4a', dark: '#2e7a3c', vein: '#4c9a48', belly: '#e04a48', foot: '#5aa83e' }, parts: [
+  { t: 'c', x1: 38, y1: 50, x2: 46, y2: 42, r1: 3, r2: 4, c: 'dark', g: 'tail', z: -2 },
+  { t: 'e', x: 52, y: 41, rx: 6.5, ry: 7, c: 'dark', g: 'tail', z: -2 },
+  { t: 'e', x: 48, y: 26, rx: 9, ry: 9, c: 'dark', g: 'tail', z: -2 },
+  { t: 'stripe', pts: [46, 35, 52, 34, 58, 37], w: 1, c: 'vein', on: 'tail' },
+  { t: 'stripe', pts: [44, 46, 49, 38, 50, 24], w: 1, c: 'vein', on: 'tail' },
+  { t: 'e', x: 41, y: 56.5, rx: 4, ry: 2.2, c: 'foot', g: 'footB', z: -1 },
+  { t: 'e', x: 38, y: 50, rx: 4, ry: 5, c: 'body', g: 'thighB', z: -0.5 },
+  { t: 'e', x: 33, y: 46, rx: 7, ry: 8.5, c: 'body', g: 'body' },
+  { t: 'spot', x: 29, y: 48, rx: 4, ry: 7, c: 'belly', on: 'body' },
+  { t: 'e', x: 31, y: 52, rx: 4, ry: 4, c: 'body', g: 'thighF', z: 0.5 },
+  { t: 'e', x: 28, y: 56.5, rx: 4.6, ry: 2.2, c: 'foot', g: 'footF', z: 1 },
+  { t: 'c', x1: 30, y1: 42, x2: 23, y2: 46, r1: 2, r2: 1.8, c: 'body', g: 'armF', z: 2 },
+  { t: 'e', x: 28, y: 30, rx: 10.5, ry: 7, c: 'body', g: 'head', z: 2 },
+  { t: 'e', x: 18, y: 32, rx: 6.5, ry: 4.2, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 22, y: 37.5, rx: 8, ry: 2, c: 'belly', on: 'head' },
+  { t: 'eye', x: 23, y: 28, s: 3.4, iris: '#e8c020', look: [-1, 0] },
+  { t: 'eye', x: 31, y: 28, s: 3, iris: '#e8c020', look: [-1, 0] },
+  { t: 'mouth', x: 14, y: 34, w: 3, style: 'line' },
+] });
+
+// @GROVYLE
+defMon('GROVYLE', { pal: { body: '#6cb84a', dark: '#2e7a3c', vein: '#4c9a48', belly: '#d84848' }, parts: [
+  { t: 'p', pts: [40, 46, 50, 42, 60, 46, 62, 54, 54, 52, 44, 52], c: 'dark', g: 'tail1', z: -2 },
+  { t: 'p', pts: [42, 50, 50, 50, 58, 58, 48, 58, 42, 54], c: 'dark', g: 'tail2', z: -1.9 },
+  { t: 'stripe', pts: [42, 48, 52, 46, 60, 50], w: 1, c: 'vein', on: 'tail1' },
+  { t: 'c', x1: 39, y1: 30, x2: 45, y2: 37, r1: 2, r2: 1.8, c: 'body', g: 'armB', z: -1 },
+  { t: 'p', pts: [41, 33, 46, 28, 54, 22, 50, 31, 45, 38], c: 'dark', g: 'leafB', z: -1.1 },
+  { t: 'c', x1: 41, y1: 46, x2: 42, y2: 55, r1: 3, r2: 2, c: 'body', g: 'legB', z: -1 },
+  { t: 'e', x: 44, y: 57, rx: 4.4, ry: 1.8, c: 'body', g: 'footB', z: -1 },
+  { t: 'e', x: 36, y: 38, rx: 6.5, ry: 10, c: 'body', g: 'body' },
+  { t: 'spot', x: 32, y: 40, rx: 3.5, ry: 8, c: 'belly', on: 'body' },
+  { t: 'e', x: 35, y: 47, rx: 4.6, ry: 4.4, c: 'body', g: 'thighF', z: 0.5 },
+  { t: 'c', x1: 34, y1: 49, x2: 30, y2: 55, r1: 2.6, r2: 2, c: 'body', g: 'legF', z: 1 },
+  { t: 'e', x: 28, y: 57, rx: 5, ry: 1.8, c: 'body', g: 'footF', z: 1 },
+  { t: 'p', pts: [26, 39, 29, 34, 33, 30, 41, 23, 38, 32, 31, 39], c: 'dark', g: 'leafF', z: 1.9 },
+  { t: 'stripe', pts: [28, 37, 34, 31, 40, 24], w: 1, c: 'vein', on: 'leafF' },
+  { t: 'c', x1: 33, y1: 30, x2: 26, y2: 38, r1: 2, r2: 1.8, c: 'body', g: 'armF', z: 2 },
+  { t: 'c', x1: 34, y1: 30, x2: 29, y2: 21, r1: 3, r2: 2.6, c: 'body', g: 'body' },
+  { t: 'p', pts: [28, 15, 40, 7, 58, 4, 46, 13, 34, 20], c: 'dark', g: 'crest', z: 1.5 },
+  { t: 'stripe', pts: [32, 15, 44, 9, 54, 6], w: 1, c: 'vein', on: 'crest' },
+  { t: 'e', x: 27, y: 18, rx: 7.5, ry: 5, c: 'body', g: 'head', z: 2 },
+  { t: 'e', x: 18, y: 20, rx: 6.5, ry: 3.2, c: 'body', g: 'head', z: 2 },
+  { t: 'eye', x: 24, y: 16.5, s: 2.8, style: 'angry', iris: '#e8c020', look: [-1, 0] },
+  { t: 'mouth', x: 14, y: 21, w: 3, style: 'line' },
+] });
+
+// @SCEPTILE
+defMon('SCEPTILE', { pal: { body: '#5aa848', dark: '#24683a', vein: '#3c8a40', belly: '#d84040', seed: '#f0d038', jaw: '#e8d070' }, parts: [
+  { t: 'p', pts: [40, 52, 50, 34, 56, 38, 54, 42, 62, 44, 58, 50, 63, 56, 54, 59, 44, 59], c: 'dark', g: 'tail', z: -2 },
+  { t: 'stripe', pts: [46, 56, 52, 46, 56, 40], w: 1, c: 'vein', on: 'tail' },
+  { t: 'e', x: 45, y: 21, rx: 3.2, ry: 2.8, c: 'seed', g: 'seed1', z: -0.5 },
+  { t: 'e', x: 48, y: 28, rx: 3.2, ry: 2.8, c: 'seed', g: 'seed2', z: -0.5 },
+  { t: 'e', x: 48, y: 35, rx: 3.2, ry: 2.8, c: 'seed', g: 'seed3', z: -0.5 },
+  { t: 'p', pts: [42, 30, 54, 18, 58, 22, 48, 34], c: 'dark', g: 'bladeB', z: -1 },
+  { t: 'c', x1: 42, y1: 46, x2: 44, y2: 55, r1: 4, r2: 2.4, c: 'body', g: 'legB', z: -1 },
+  { t: 'e', x: 47, y: 57, rx: 5, ry: 2, c: 'body', g: 'footB', z: -1 },
+  { t: 'e', x: 37, y: 35, rx: 8.5, ry: 13, c: 'body', g: 'body' },
+  { t: 'spot', x: 32, y: 38, rx: 4.5, ry: 11, c: 'belly', on: 'body' },
+  { t: 'e', x: 36, y: 47, rx: 6, ry: 5, c: 'body', g: 'thighF', z: 0.5 },
+  { t: 'c', x1: 34, y1: 50, x2: 30, y2: 55, r1: 3, r2: 2.4, c: 'body', g: 'legF', z: 1 },
+  { t: 'e', x: 27, y: 57, rx: 6, ry: 2, c: 'body', g: 'footF', z: 1 },
+  { t: 'c', x1: 34, y1: 26, x2: 28, y2: 13, r1: 4, r2: 3.2, c: 'body', g: 'body' },
+  { t: 'c', x1: 32, y1: 27, x2: 23, y2: 37, r1: 2.6, r2: 2.2, c: 'body', g: 'armF', z: 2 },
+  { t: 'p', pts: [22, 38, 30, 26, 42, 18, 36, 30], c: 'dark', g: 'bladeF', z: 2.1 },
+  { t: 'stripe', pts: [26, 34, 32, 27, 39, 21], w: 1, c: 'vein', on: 'bladeF' },
+  { t: 'p', pts: [26, 8, 38, 2, 54, 1, 44, 8, 32, 14], c: 'dark', g: 'crest', z: 1.5 },
+  { t: 'e', x: 26, y: 11, rx: 7.5, ry: 5, c: 'body', g: 'head', z: 2 },
+  { t: 'e', x: 16, y: 13, rx: 7.5, ry: 3.2, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 17, y: 16, rx: 9, ry: 1.6, c: 'jaw', on: 'head' },
+  { t: 'eye', x: 23, y: 9.5, s: 2.8, style: 'angry', iris: '#e8b020', look: [-1, 0] },
+  { t: 'mouth', x: 11, y: 14, w: 3, style: 'line' },
+] });
+
+// @TORCHIC
+defMon('TORCHIC', { pal: { body: '#f2873a', yellow: '#f8c840', beak: '#f0b030', leg: '#e8a040' }, parts: [
+  { t: 'c', x1: 34, y1: 52, x2: 35, y2: 56, r1: 1.4, r2: 1.2, c: 'leg', g: 'legB', z: -1 },
+  { t: 'e', x: 35, y: 57, rx: 3, ry: 1.3, c: 'leg', g: 'footB', z: -1 },
+  { t: 'e', x: 33, y: 47, rx: 9, ry: 7.5, c: 'body', g: 'body' },
+  { t: 'spot', x: 38, y: 46, rx: 6, ry: 6, c: 'yellow', on: 'body' },
+  { t: 'c', x1: 29, y1: 52, x2: 28, y2: 56, r1: 1.4, r2: 1.2, c: 'leg', g: 'legF', z: 1 },
+  { t: 'e', x: 27, y: 57, rx: 3, ry: 1.3, c: 'leg', g: 'footF', z: 1 },
+  { t: 'p', pts: [28, 33, 25, 23, 30, 29, 33, 22, 34, 30, 39, 26, 36, 34], c: 'body', g: 'crest', z: 1.5 },
+  { t: 'e', x: 29, y: 38, rx: 8.5, ry: 7.5, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 34, y: 41, rx: 4, ry: 3.5, c: 'yellow', on: 'head' },
+  { t: 'e', x: 39, y: 47, rx: 3, ry: 4.5, rot: -15, c: 'yellow', g: 'wing', z: 3 },
+  { t: 'p', pts: [21, 37, 15, 39.5, 21, 42], c: 'beak', g: 'beak', z: 3, face: true },
+  { t: 'eye', x: 24, y: 36, s: 2.6, look: [-1, 0] },
+] });
+
+// @COMBUSKEN
+defMon('COMBUSKEN', { pal: { body: '#e8642e', cream: '#f2d888', yellow: '#f8c438', shin: '#e2b866', talon: '#e8e0c8' }, parts: [
+  { t: 'p', pts: [30, 12, 40, 9, 50, 11, 39, 16], c: 'body', g: 'crest1', z: -1 },
+  { t: 'p', pts: [31, 16, 44, 15, 52, 19, 37, 21], c: 'cream', g: 'crest2', z: -1.1 },
+  { t: 'c', x1: 42, y1: 44, x2: 44, y2: 54, r1: 2.8, r2: 2, c: 'shin', g: 'legB', z: -1 },
+  { t: 'p', pts: [41, 55, 47, 55, 50, 58, 38, 58], c: 'talon', g: 'footB', z: -1 },
+  { t: 'c', x1: 41, y1: 27, x2: 47, y2: 35, r1: 2.6, r2: 2.4, c: 'body', g: 'armB', z: -0.5 },
+  { t: 'e', x: 35, y: 31, rx: 10, ry: 10, c: 'body', g: 'body' },
+  { t: 'spot', x: 29, y: 32, rx: 4, ry: 7, c: 'cream', on: 'body' },
+  { t: 'e', x: 37, y: 42, rx: 9, ry: 6, c: 'cream', g: 'hips', z: 0.3 },
+  { t: 'e', x: 33, y: 46, rx: 5, ry: 5, c: 'cream', g: 'thighF', z: 0.6 },
+  { t: 'c', x1: 32, y1: 48, x2: 29, y2: 54, r1: 3, r2: 2.2, c: 'shin', g: 'legF', z: 1 },
+  { t: 'p', pts: [23, 58, 25, 55, 32, 55, 34, 58], c: 'talon', g: 'footF', z: 1 },
+  { t: 'c', x1: 30, y1: 27, x2: 22, y2: 34, r1: 2.8, r2: 2.6, c: 'body', g: 'armF', z: 2 },
+  { t: 'e', x: 21, y: 35, rx: 2.8, ry: 2.6, c: 'body', g: 'armF', z: 2 },
+  { t: 'e', x: 28, y: 17, rx: 7.5, ry: 7, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 30, y: 22, rx: 5, ry: 3, c: 'yellow', on: 'head' },
+  { t: 'p', pts: [21, 17, 14, 19.5, 21, 22], c: 'yellow', g: 'beak', z: 3, face: true },
+  { t: 'eye', x: 24, y: 15.5, s: 2.6, style: 'angry', iris: '#3a68c0', look: [-1, 0] },
+] });
+
+// @BLAZIKEN
+defMon('BLAZIKEN', { pal: { body: '#d63c2c', mane: '#f2e4c4', cream: '#ecc870', leg: '#d8a848', grey: '#8a8a90', fire: '#f8b030', talon: '#e8e0c8' }, parts: [
+  { t: 'p', pts: [32, 9, 42, 9, 52, 17, 58, 30, 59, 48, 53, 42, 47, 30, 38, 20], c: 'mane', g: 'mane', z: -2 },
+  { t: 'p', pts: [29, 10, 38, 3, 48, 2, 38, 10, 33, 13], c: 'mane', g: 'hornB', z: 1.5 },
+  { t: 'c', x1: 42, y1: 44, x2: 44, y2: 54, r1: 3, r2: 2.2, c: 'leg', g: 'legB', z: -1 },
+  { t: 'p', pts: [41, 55, 48, 55, 51, 58, 38, 58], c: 'talon', g: 'footB', z: -1 },
+  { t: 'c', x1: 41, y1: 27, x2: 48, y2: 37, r1: 2.8, r2: 2.4, c: 'body', g: 'armB', z: -0.5 },
+  { t: 'p', pts: [46, 34, 50, 32, 53, 36, 54, 41, 50, 39], c: 'fire', g: 'cuffB', z: -0.4, flat: true },
+  { t: 'e', x: 36, y: 32, rx: 8.5, ry: 10, c: 'body', g: 'body' },
+  { t: 'p', pts: [29, 24, 34, 33, 39, 24, 36, 36, 32, 36], c: 'mane', g: 'chest', z: 0.2 },
+  { t: 'e', x: 37, y: 42, rx: 8.5, ry: 5.5, c: 'cream', g: 'hips', z: 0.3 },
+  { t: 'e', x: 34, y: 46, rx: 5, ry: 5, c: 'cream', g: 'thighF', z: 0.6 },
+  { t: 'c', x1: 33, y1: 48, x2: 30, y2: 54, r1: 3, r2: 2.4, c: 'leg', g: 'legF', z: 1 },
+  { t: 'p', pts: [23, 58, 26, 55, 33, 55, 35, 58], c: 'talon', g: 'footF', z: 1 },
+  { t: 'c', x1: 31, y1: 27, x2: 23, y2: 36, r1: 3, r2: 2.6, c: 'body', g: 'armF', z: 2 },
+  { t: 'p', pts: [27, 39, 21, 38, 17, 32, 21, 34, 21, 29, 25, 33, 28, 30, 29, 36], c: 'fire', g: 'cuffF', z: 2.1, flat: true },
+  { t: 'e', x: 21, y: 39, rx: 2.8, ry: 2.6, c: 'grey', g: 'fist', z: 2.2 },
+  { t: 'e', x: 29, y: 15, rx: 8.5, ry: 7.5, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 26, y: 17, rx: 3, ry: 2.4, c: 'grey', on: 'head' },
+  { t: 'p', pts: [24, 11, 31, 3, 42, 0, 35, 8, 29, 13], c: 'mane', g: 'hornF', z: 2.5 },
+  { t: 'p', pts: [22, 15, 14, 17.5, 22, 20], c: 'fire', g: 'beak', z: 3, face: true },
+  { t: 'eye', x: 25, y: 14, s: 2.6, style: 'angry', iris: '#3a68c0', look: [-1, 0] },
+] });
+
+// @MUDKIP
+defMon('MUDKIP', { pal: { body: '#66ade6', belly: '#dcecf6', gill: '#f08030', fin: '#2a4c86' }, parts: [
+  { t: 'p', pts: [46, 46, 54, 34, 60, 38, 56, 48, 50, 50], c: 'fin', g: 'tail', z: -1 },
+  { t: 'e', x: 47, y: 55, rx: 3, ry: 3, c: 'body', g: 'legBR', z: -1 },
+  { t: 'e', x: 41, y: 47, rx: 11, ry: 7.5, c: 'body', g: 'body' },
+  { t: 'spot', x: 40, y: 54, rx: 9, ry: 3, c: 'belly', on: 'body' },
+  { t: 'e', x: 49, y: 55, rx: 3, ry: 3.4, c: 'body', g: 'legFR', z: 1 },
+  { t: 'e', x: 34, y: 55.5, rx: 3.2, ry: 3.2, c: 'body', g: 'legFL', z: 1 },
+  { t: 'e', x: 28, y: 27, rx: 4.5, ry: 8.5, rot: 10, c: 'body', g: 'finHead', z: 1.5 },
+  { t: 'stripe', pts: [27, 33, 29, 21], w: 1.2, c: 'fin', on: 'finHead' },
+  { t: 'e', x: 25, y: 41, rx: 10, ry: 8.5, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 21, y: 47.5, rx: 9, ry: 3.2, c: 'belly', on: 'head' },
+  { t: 'p', pts: [30, 40, 37, 35, 35, 40, 40, 41, 35, 44, 37, 48, 30, 45], c: 'gill', g: 'gill', z: 3 },
+  { t: 'eye', x: 20, y: 39, s: 2.6, look: [-1, 0] },
+  { t: 'mouth', x: 15, y: 44, w: 2, style: 'smile' },
+] });
+
+// @MARSHTOMP
+defMon('MARSHTOMP', { pal: { body: '#5c9ed6', belly: '#c6d4dc', gill: '#f08030', fin: '#2a4c86' }, parts: [
+  { t: 'p', pts: [42, 46, 54, 40, 60, 48, 52, 52], c: 'fin', g: 'tail', z: -1 },
+  { t: 'e', x: 42, y: 56, rx: 4.6, ry: 2.6, c: 'body', g: 'footB', z: -1 },
+  { t: 'c', x1: 40, y1: 30, x2: 46, y2: 40, r1: 3, r2: 2.6, c: 'body', g: 'armB', z: -0.5 },
+  { t: 'e', x: 36, y: 42, rx: 10, ry: 12, c: 'body', g: 'body' },
+  { t: 'spot', x: 32, y: 45, rx: 6, ry: 9, c: 'belly', on: 'body' },
+  { t: 'e', x: 30, y: 56, rx: 5, ry: 2.8, c: 'body', g: 'footF', z: 1 },
+  { t: 'c', x1: 31, y1: 34, x2: 24, y2: 43, r1: 3, r2: 2.8, c: 'body', g: 'armF', z: 2 },
+  { t: 'p', pts: [28, 20, 34, 6, 40, 10, 38, 22], c: 'fin', g: 'finHead', z: 1.5 },
+  { t: 'e', x: 29, y: 26, rx: 9.5, ry: 8, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 24, y: 31, rx: 8, ry: 3, c: 'belly', on: 'head' },
+  { t: 'p', pts: [33, 25, 41, 20, 38, 26, 43, 28, 38, 30, 40, 35, 33, 31], c: 'gill', g: 'gill', z: 3 },
+  { t: 'eye', x: 23, y: 24, s: 2.6, look: [-1, 0] },
+  { t: 'mouth', x: 19, y: 29.5, w: 2.5, style: 'smile' },
+] });
+
+// @SWAMPERT
+defMon('SWAMPERT', { pal: { body: '#4a8cd0', belly: '#c0d0dc', gill: '#f07a2a', fin: '#24283a' }, parts: [
+  { t: 'p', pts: [44, 44, 56, 34, 63, 40, 58, 50], c: 'fin', g: 'tail', z: -2 },
+  { t: 'e', x: 46, y: 56, rx: 6, ry: 3, c: 'body', g: 'footB', z: -1 },
+  { t: 'c', x1: 44, y1: 24, x2: 52, y2: 44, r1: 5, r2: 4, c: 'body', g: 'armB', z: -0.5 },
+  { t: 'e', x: 53, y: 46, rx: 4.6, ry: 3.6, c: 'body', g: 'armB', z: -0.5 },
+  { t: 'e', x: 38, y: 38, rx: 13, ry: 15, c: 'body', g: 'body' },
+  { t: 'spot', x: 32, y: 43, rx: 7, ry: 11, c: 'belly', on: 'body' },
+  { t: 'e', x: 33, y: 55.5, rx: 6.5, ry: 3.2, c: 'body', g: 'footF', z: 1 },
+  { t: 'p', pts: [22, 16, 26, 8, 34, 3, 46, 6, 40, 13, 34, 17], c: 'fin', g: 'finHead', z: 1.5 },
+  { t: 'e', x: 26, y: 22, rx: 11, ry: 8.5, c: 'body', g: 'head', z: 2 },
+  { t: 'spot', x: 20, y: 28, rx: 9, ry: 3, c: 'belly', on: 'head' },
+  { t: 'p', pts: [30, 18, 42, 12, 37, 19, 46, 20, 38, 24, 44, 30, 32, 27], c: 'gill', g: 'gill', z: 3 },
+  { t: 'c', x1: 32, y1: 28, x2: 20, y2: 44, r1: 5.5, r2: 4.5, c: 'body', g: 'armF', z: 3 },
+  { t: 'e', x: 18, y: 47, rx: 5.5, ry: 4.2, c: 'body', g: 'armF', z: 3 },
+  { t: 'stripe', pts: [14, 48, 16, 51], w: 1, c: 'fin', on: 'armF' },
+  { t: 'stripe', pts: [19, 49, 20, 51], w: 1, c: 'fin', on: 'armF' },
+  { t: 'eye', x: 21, y: 20, s: 2.6, style: 'angry', iris: '#e88a30', look: [-1, 0] },
+  { t: 'mouth', x: 16, y: 25.5, w: 3, style: 'line' },
+] });
+
+// @POOCHYENA
+defMon('POOCHYENA', { pal: { fur: '#a4a4ac', mane: '#34343e', nose: '#c84060', scl: '#f0d040', red: '#d02a2a' }, parts: [
+  { t: 'p', pts: [45, 46, 49, 40, 54, 34, 58, 33, 60, 38, 57, 44, 51, 48], c: 'mane', g: 'tail', z: -1 },
+  { t: 'c', x1: 45, y1: 51, x2: 46, y2: 55, r1: 2.2, r2: 2, c: 'fur', g: 'legBR', z: -1 },
+  { t: 'e', x: 46, y: 57, rx: 2.6, ry: 1.4, c: 'mane', g: 'pawBR', z: -1 },
+  { t: 'c', x1: 34, y1: 51, x2: 34, y2: 55, r1: 2.2, r2: 2, c: 'fur', g: 'legBL', z: -1 },
+  { t: 'e', x: 33, y: 57, rx: 2.6, ry: 1.4, c: 'mane', g: 'pawBL', z: -1 },
+  { t: 'e', x: 40, y: 48, rx: 9, ry: 5.5, c: 'fur', g: 'body' },
+  { t: 'spot', x: 43, y: 43, rx: 8, ry: 2.8, c: 'mane', on: 'body' },
+  { t: 'c', x1: 43, y1: 51, x2: 43, y2: 55, r1: 2.4, r2: 2.2, c: 'fur', g: 'legFR', z: 1 },
+  { t: 'e', x: 42, y: 57, rx: 2.8, ry: 1.5, c: 'mane', g: 'pawFR', z: 1.1 },
+  { t: 'c', x1: 32, y1: 51, x2: 31, y2: 55, r1: 2.4, r2: 2.2, c: 'fur', g: 'legFL', z: 1 },
+  { t: 'e', x: 30, y: 57, rx: 2.8, ry: 1.5, c: 'mane', g: 'pawFL', z: 1.1 },
+  { t: 'p', pts: [26, 37, 31, 33, 34, 39, 40, 41, 41, 45, 32, 45], c: 'mane', g: 'tuft', z: 1.5 },
+  { t: 'p', pts: [26, 39, 25, 31, 31, 36], c: 'mane', g: 'earF', z: 1.6 },
+  { t: 'e', x: 26, y: 44, rx: 7, ry: 6, c: 'fur', g: 'head', z: 2 },
+  { t: 'e', x: 19, y: 47, rx: 4.5, ry: 3, c: 'fur', g: 'head', z: 2 },
+  { t: 'spot', x: 28, y: 39.5, rx: 5.5, ry: 2.4, c: 'mane', on: 'head' },
+  { t: 'e', x: 14.5, y: 46.5, rx: 1.5, ry: 1.2, c: 'nose', g: 'nose', z: 3, face: true },
+  { t: 'e', x: 23, y: 43, rx: 2.8, ry: 2.3, c: 'scl', g: 'eyeY', z: 3, face: true, flat: true, line: false },
+  { t: 'spot', x: 22.2, y: 43.2, rx: 1.7, ry: 1.7, c: 'red', on: 'eyeY' },
+  { t: 'eye', x: 22, y: 43, s: 1, style: 'dot' },
+  { t: 'mouth', x: 17, y: 49, w: 2, style: 'fang' },
+] });

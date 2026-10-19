@@ -14,7 +14,7 @@ it('the outfit can be changed from the START menu', () => {
   const round = keep => {
     tap('start'); settle(12);
     const before = (G.flag('EVENT_GOT_POKEDEX') ? 1 : 0) + (G.state.party.length ? 1 : 0);
-    tap('down', before + 2); tap('a'); // ITEM, name, then OUTFIT
+    tap('down', before + 3); tap('a'); // ITEM, MAP, name, then OUTFIT
     check(top().constructor.name === 'Customizer', 'OUTFIT opens the customizer');
     tap('down', 3); tap('right'); // change a colour
     tap('start'); settle(30); // DONE

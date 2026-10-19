@@ -10,17 +10,22 @@ const INK = hex('#3a3a4c');
 
 // ---------------- save / load ----------------
 const SAVE_KEY = 'pkmn_pixel_red_save';
-G.saveGame = function () {
+G.serializeState = function () {
   const S = G.state;
-  const data = Object.assign({}, S, { party: S.party.map(m => m.toJSON()), boxes: S.boxes.map(b => b.map(m => m.toJSON())), savedAt: Date.now() });
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); return true; } catch (e) { return false; }
+  return JSON.stringify(Object.assign({}, S, { party: S.party.map(m => m.toJSON()), boxes: S.boxes.map(b => b.map(m => m.toJSON())), savedAt: Date.now() }));
+};
+G.restoreState = function (raw) {
+  const d = JSON.parse(raw);
+  d.party = d.party.map(G.Mon.from); d.boxes = d.boxes.map(b => b.map(G.Mon.from));
+  return Object.assign(G.newState(), d);
+};
+G.saveGame = function () {
+  try { localStorage.setItem(SAVE_KEY, G.serializeState()); return true; } catch (e) { return false; }
 };
 G.loadSave = function () {
   try {
     const raw = localStorage.getItem(SAVE_KEY); if (!raw) return null;
-    const d = JSON.parse(raw);
-    d.party = d.party.map(G.Mon.from); d.boxes = d.boxes.map(b => b.map(G.Mon.from));
-    return Object.assign(G.newState(), d);
+    return G.restoreState(raw);
   } catch (e) { return null; }
 };
 G.hasSave = () => { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } };
@@ -36,7 +41,7 @@ G.startMenu = function* () {
       const items = [];
       if (G.flag('EVENT_GOT_POKEDEX')) items.push('POKéDEX');
       if (G.state.party.length) items.push('POKéMON');
-      items.push('ITEM', G.state.name, 'OUTFIT', 'SHARE', 'SAVE', 'OPTION', 'EXIT');
+      items.push('ITEM', 'MAP', G.state.name, 'OUTFIT', 'GUIDE', 'SHARE', 'SAVE', 'OPTION', 'EXIT');
       const r = yield* G.choose(items, { x: 222, y: 6, w: 92, sel: Math.min(sel, items.length - 1) });
       if (r < 0 || items[r] === 'EXIT') return;
       sel = r;
@@ -51,6 +56,8 @@ G.startMenu = function* () {
         if (yield* G.ask('Keep this new look?')) G.state.look = look;
         else G.applyLook(before);
       }
+      else if (it === 'MAP') yield* G.regionMap.open(); // the detailed Kanto map (src/engine/game/regionmap.ts)
+      else if (it === 'GUIDE') yield* G.openGuide();
       else if (it === 'SHARE') yield* G.shareMenu();
       else if (it === 'SAVE') {
         if (yield* G.ask('Would you like to SAVE the game?')) {
@@ -64,6 +71,37 @@ G.startMenu = function* () {
   }
 };
 
+// ---------------- strategy guide ----------------
+// The /guide page in a panel over the game, so a home-screen app never navigates away from an unsaved game
+G.openGuide = function* () {
+  if (typeof document === 'undefined') return;
+  const panel = document.createElement('div');
+  panel.style.cssText = 'position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;background:#12101c;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)';
+  const back = document.createElement('button');
+  back.type = 'button'; back.textContent = '✕  Back to game';
+  back.style.cssText = 'flex:none;padding:12px 16px;border:0;background:#2a2440;color:#f4f0ff;font:600 15px system-ui,sans-serif;text-align:left;cursor:pointer';
+  const frame = document.createElement('iframe');
+  frame.src = '/guide'; frame.title = 'Strategy guide';
+  frame.style.cssText = 'flex:1;width:100%;border:0;background:#fff';
+  panel.append(back, frame);
+  let open = true;
+  const close = () => { open = false; };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  back.addEventListener('click', close);
+  // the guide's own links back to the game just close the panel instead of loading a second copy inside it
+  frame.addEventListener('load', () => {
+    const doc = frame.contentDocument;
+    if (doc) doc.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a[href]'); if (a && new URL(a.href).pathname === '/') { e.preventDefault(); close(); } });
+  });
+  window.addEventListener('keydown', onKey);
+  document.body.appendChild(panel);
+  back.focus();
+  while (open) yield;
+  window.removeEventListener('keydown', onKey);
+  panel.remove();
+  G.input.clear();
+};
+
 // ---------------- trainer card ----------------
 const BADGES = ['BOULDERBADGE', 'CASCADEBADGE', 'THUNDERBADGE', 'RAINBOWBADGE', 'SOULBADGE', 'MARSHBADGE', 'VOLCANOBADGE', 'EARTHBADGE'];
 const LEADERS = ['BROCK', 'MISTY', 'LT.SURGE', 'ERIKA', 'KOGA', 'SABRINA', 'BLAINE', 'GIOVANNI'];
@@ -74,9 +112,13 @@ function drawBadge(s, i, x, y, has) {
     ['.#.#.', '#####', '#####', '.###.', '..#..'], ['.###.', '#...#', '#.#.#', '#...#', '.###.'], ['#####', '#...#', '#.#.#', '#...#', '#####'],
     ['..#..', '.#.#.', '#.#.#', '.#.#.', '..#..'], ['.###.', '#####', '##.##', '#####', '.###.'],
   ];
-  const cols = ['#a0a0a8', '#58a8f0', '#f8b830', '#78d078', '#e060a8', '#e8c848', '#f06038', '#58c098'];
-  const c = has ? hex(cols[i]) : hex('#6a6a7a');
-  shapes[i].forEach((r, j) => { for (let k = 0; k < 5; k++) if (r[k] === '#') { s.rect(x + k * 3, y + j * 3, 3, 3, c); if (has && j < 2) s.pset(x + k * 3, y + j * 3, shade(c, 0.4)); } });
+  const cols = ['#b4b8c8', '#58a8f0', '#f8b830', '#78d078', '#e060a8', '#e8c848', '#f06038', '#58c098'];
+  const cells = []; shapes[i].forEach((r, j) => { for (let k = 0; k < 5; k++) if (r[k] === '#') cells.push([x + k * 3, y + j * 3, j]); });
+  if (!has) { for (const [cx, cy] of cells) s.rect(cx, cy, 3, 3, hex('#dcdce4')); return; } // an empty slot until it's earned
+  const c = hex(cols[i]), edge = shade(c, -0.6);
+  for (const [cx, cy] of cells) s.rect(cx - 1, cy - 1, 5, 5, edge);
+  for (const [cx, cy, j] of cells) { s.rect(cx, cy, 3, 3, j > 2 ? shade(c, -0.18) : c); if (j < 2) s.pset(cx, cy, shade(c, 0.45)); }
+  s.pset(x + 4, y + 4, hex('#ffffff'));
 }
 G.drawBadge = drawBadge;
 G.trainerCard = function* () {
@@ -99,14 +141,14 @@ G.trainerCard = function* () {
 G.optionsMenu = function* () {
   const O = G.state.options;
   for (;;) {
-    const items = ['TEXT SPEED: ' + ['SLOW', 'MID', 'FAST'][O.textSpeed - 1 < 0 ? 1 : O.textSpeed - 1], 'BATTLE ANIM: ' + (O.battleAnim ? 'ON' : 'OFF'), 'BATTLE STYLE: ' + (O.battleStyle === 'shift' ? 'SHIFT' : 'SET'), 'SOUND: ' + (O.mute ? 'OFF' : 'ON'), 'DAY/NIGHT: ' + (O.dayNight === false ? 'OFF' : 'ON'), 'CANCEL'];
+    const items = ['TEXT SPEED: ' + ['SLOW', 'MID', 'FAST'][O.textSpeed - 1 < 0 ? 1 : O.textSpeed - 1], 'BATTLE ANIM: ' + (O.battleAnim ? 'ON' : 'OFF'), 'BATTLE STYLE: ' + (O.battleStyle === 'shift' ? 'SHIFT' : 'SET'), 'SOUND: ' + (O.mute !== false ? 'OFF' : 'ON'), 'DAY/NIGHT: ' + (O.dayNight === false ? 'OFF' : 'ON'), 'CANCEL'];
     const r = yield* G.choose(items, { x: 120, y: 30, w: 190 });
     if (r < 0 || r === 5) return;
     if (r === 4) O.dayNight = O.dayNight === false;
     if (r === 0) { O.textSpeed = O.textSpeed % 3 + 1; G.textSpeed = O.textSpeed; }
     if (r === 1) O.battleAnim = !O.battleAnim;
     if (r === 2) O.battleStyle = O.battleStyle === 'shift' ? 'set' : 'shift';
-    if (r === 3) { O.mute = !O.mute; if (G.audio) G.audio.setMute(O.mute); }
+    if (r === 3) { O.mute = O.mute === false; if (G.audio) G.audio.setMute(O.mute); }
   }
 };
 
@@ -155,7 +197,7 @@ G.namingScreen = function* (prompt, def, max) {
 G.pokedex = function* () {
   const D = G.DATA, S = G.state;
   let sel = 0, top = 0;
-  const total = D.dexOrder.length - 1; // 251 with the Gen 2 species
+  const total = D.dexOrder.length - 1; // 386 with the Gen 2 and Gen 3 species
   const scene = { opaque: true, t: 0, done: false, update(f) {
     this.t++; if (!f) return;
     const I = G.input, Pt = G.pointer;

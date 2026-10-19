@@ -11,7 +11,7 @@ const KEY = new Set(['TOWN_MAP', 'BICYCLE', 'SURFBOARD', 'POKEDEX', 'OLD_AMBER',
 const HEAL = { POTION: 20, SUPER_POTION: 50, HYPER_POTION: 200, MAX_POTION: 9999, FULL_RESTORE: 9999, FRESH_WATER: 50, SODA_POP: 60, LEMONADE: 80 };
 const CURE = { ANTIDOTE: ['PSN'], BURN_HEAL: ['BRN'], ICE_HEAL: ['FRZ'], AWAKENING: ['SLP'], PARLYZ_HEAL: ['PAR'], FULL_HEAL: ['PSN', 'BRN', 'FRZ', 'SLP', 'PAR'], FULL_RESTORE: ['PSN', 'BRN', 'FRZ', 'SLP', 'PAR'] };
 const VITAMIN = { HP_UP: 'hp', PROTEIN: 'atk', IRON: 'def', CARBOS: 'spd', CALCIUM: 'spc' };
-const EVO_ITEM = id => /STONE$/.test(id) || ['METAL_COAT', 'KINGS_ROCK', 'DRAGON_SCALE', 'UP_GRADE'].includes(id);
+const EVO_ITEM = id => /STONE$/.test(id) || ['METAL_COAT', 'KINGS_ROCK', 'DRAGON_SCALE', 'UP_GRADE'].includes(id) || !!(G.DATA.items[id] && G.DATA.items[id].evo);
 const X_ITEM = { X_ATTACK: 'atk', X_DEFEND: 'def', X_SPEED: 'spd', X_SPECIAL: 'spc', X_ACCURACY: 'acc' };
 const DESC = {
   POTION: 'Restores 20 HP to one POKéMON.', SUPER_POTION: 'Restores 50 HP to one POKéMON.', HYPER_POTION: 'Restores 200 HP to one POKéMON.',

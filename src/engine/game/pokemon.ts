@@ -49,7 +49,7 @@ class Mon {
   recalc(init) {
     const sp = this.sp, L = this.level, dv = this.dv, se = this.sexp;
     const oldMax = this.maxhp;
-    this.maxhp = calcStat(sp.hp, dv.hp, se.hp, L, true);
+    this.maxhp = sp.fixedHp || calcStat(sp.hp, dv.hp, se.hp, L, true); // Shedinja is always 1 HP
     this.atk = calcStat(sp.atk, dv.atk, se.atk, L);
     this.def = calcStat(sp.def, dv.def, se.def, L);
     this.spd = calcStat(sp.spd, dv.spd, se.spd, L);
@@ -80,6 +80,8 @@ class Mon {
       if (e.type === 'level' && this.level >= e.level) return e.to;
       // TYROGUE: which of Attack and Defense is higher picks the evolution
       if (e.type === 'stat' && this.level >= e.level && Math.sign(this.atk - this.def) === e.cmp) return e.to;
+      // WURMPLE: Gen 3 used a hidden value; the Attack DV's parity picks the branch, so each Wurmple always goes one way
+      if (e.type === 'dv' && this.level >= e.level && (this.dv.atk & 1) === e.parity) return e.to;
     }
     return null;
   }

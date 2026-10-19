@@ -32,7 +32,7 @@ function* got(item, n, label) {
 }
 // Money window in the top-right corner (as in the museum / Magikarp / bike shop dialogues)
 function moneyBox() {
-  const box = { done: false, draw(s) {
+  const box = { done: false, hud: true, draw(s) {
     const t = '$' + G.state.money, w = Math.max(90, G.font.measure(t) + 30);
     G.ui.frame(s, 316 - w, 4, w, 38, 'gray');
     G.ui.text(s, 'MONEY', 328 - w, 11);
@@ -195,7 +195,7 @@ const benchGuy = label => function* () { if (S.player().dir === 'left') yield* S
 
 // ---- Fossil / Pokédex pop-ups ----
 function* monPopup(sp, label, fossil) {
-  const pic = { done: false, draw(s) {
+  const pic = { done: false, hud: true, draw(s) {
     G.ui.frame(s, 104, 16, 112, 100);
     s.blit(G.pokeSprite(sp, 'front'), 128, 30, fossil ? { tint: G.gfx.hex('#b8a888'), tintAmt: 0.75 } : undefined);
     return !this.done;

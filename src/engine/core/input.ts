@@ -1,6 +1,6 @@
 // Keyboard / gamepad input mapped onto Game Boy style buttons.
 import { game } from '../global';
-import { W, H } from './gfx';
+import { W, view } from './gfx';
 
 export const BTN = ['up', 'down', 'left', 'right', 'a', 'b', 'start', 'select'] as const;
 export type Button = (typeof BTN)[number];
@@ -31,8 +31,8 @@ let canvasEl: HTMLElement | null = null;
 function toGame(e: MouseEvent) {
   const c = canvasEl || (canvasEl = document.getElementById('screen')); if (!c) return false;
   const r = c.getBoundingClientRect(); if (!r.width) return false;
-  pointer.x = Math.floor((e.clientX - r.left) * W / r.width); pointer.y = Math.floor((e.clientY - r.top) * H / r.height);
-  pointer.inside = pointer.x >= 0 && pointer.y >= 0 && pointer.x < W && pointer.y < H;
+  pointer.x = Math.floor((e.clientX - r.left) * W / r.width); pointer.y = Math.floor((e.clientY - r.top) * view.h / r.height);
+  pointer.inside = pointer.x >= 0 && pointer.y >= 0 && pointer.x < W && pointer.y < view.h;
   return pointer.inside;
 }
 

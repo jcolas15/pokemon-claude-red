@@ -55,6 +55,12 @@ class Battle {
   }
   types(side) { return side.v.types || (side.v.transformed ? side.v.transformed.types : this.mon(side).types); }
   moveList(side) { const v = side.v, m = this.mon(side); return v.transformed ? v.transformed.moves : m.moves; }
+  // SELECT in the move menu swaps two moves, as in Red; a Mimic slot follows its move so it is restored in place
+  swapMoves(side, i, j) {
+    const list = this.moveList(side), mimic = side.v.mimic;
+    [list[i], list[j]] = [list[j], list[i]];
+    if (mimic && !side.v.transformed) mimic.slot = mimic.slot === i ? j : mimic.slot === j ? i : mimic.slot;
+  }
 
   // ---------------- main loop ----------------
   *run(ui) {
@@ -196,6 +202,8 @@ class Battle {
     const name = this.label(side);
     v.moved = true;
     if (moveId === '_RECHARGE') { v.recharge = false; yield* ui.msg(name + ' must recharge!'); return; }
+    // Slaking's TRUANT: acts the turn it comes in, then every other turn (the one ability this game keeps besides WONDER GUARD)
+    if (A.sp.ability === 'TRUANT') { v.truantActs = !v.truantActs; if (!v.truantActs) { yield* ui.msg(name + ' is loafing around!'); return; } }
     if (A.status === 'SLP') {
       A.sleep--;
       if (A.sleep > 0) { yield* ui.statusAnim(side, 'SLP'); yield* ui.msg(name + ' is fast asleep!'); return; }
@@ -310,6 +318,10 @@ class Battle {
     if (tm === 0 && eff !== 'SPECIAL_DAMAGE' && eff !== 'SUPER_FANG') {
       yield* ui.msg("It doesn't affect " + tname + '!'); v.thrash = null; return;
     }
+    // Shedinja's WONDER GUARD: only super-effective hits land (Struggle still does)
+    if (T.sp.ability === 'WONDER_GUARD' && tm < 2 && md.id !== 'STRUGGLE') {
+      yield* ui.msg(tname + "'s WONDER GUARD blocked it!"); v.thrash = null; return;
+    }
     if (eff === 'DREAM_EATER' && T.status !== 'SLP') { yield* ui.msg("It didn't affect " + tname + '!'); return; }
     if (eff === 'OHKO') {
       if (this.stat(side, 'spd') < this.stat(foe, 'spd')) { yield* ui.msg(name + "'s attack missed!"); return; }
@@ -389,7 +401,7 @@ class Battle {
     let crit = false;
     if (useCrit && md.type !== 'NORMAL_CONF') {
       let base = Math.floor((A.sp.spd) / 2);
-      if (HIGH_CRIT.has(md.id)) base = base * 8;
+      if (HIGH_CRIT.has(md.id) || md.highCrit) base = base * 8;
       if (side.v.focus) base = base * 4;
       crit = rnd(256) < Math.min(255, base);
     }

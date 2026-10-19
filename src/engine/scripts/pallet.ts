@@ -204,7 +204,7 @@ function* pickBall(ball) {
   if (S.flag('EVENT_GOT_STARTER')) { yield* S.say('OaksLabLastMonText'); return; }
   // show the Pokémon inside
   const pic = { t: 0, draw(s) { this.t++; G.ui.frame(s, 110, 20, 100, 90); s.blit(G.pokeSprite(sp, 'front'), 128, 32); return !this.done; } };
-  G.ow.fx.push({ draw: (s) => pic.draw(s) });
+  G.ow.fx.push({ hud: true, draw: (s) => pic.draw(s) });
   G.cry && G.cry(sp);
   const q = { CHARMANDER: 'OaksLabYouWantCharmanderText', SQUIRTLE: 'OaksLabYouWantSquirtleText', BULBASAUR: 'OaksLabYouWantBulbasaurText' }[sp];
   const yes = yield* S.ask(q);

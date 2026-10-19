@@ -84,6 +84,7 @@ function nooks(name) {
   return q.filter(([x, y]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => dist.has(key(x + dx, y + dy))).length === 1)
     .sort((a, b) => dist.get(key(b[0], b[1])) - dist.get(key(a[0], a[1])) || a[1] - b[1] || a[0] - b[0]);
 }
+G.nooks = nooks; // also used by src/engine/scripts/gen3.ts
 const HIDDEN = [['PowerPlant', 'METAL_COAT', 'Power Plant'], ['VictoryRoad2F', 'METAL_COAT', 'Victory Road 2F'],
   ['SSAnneB1FRooms', 'KINGS_ROCK', 'S.S. Anne, lower-deck cabins'], ['SeafoamIslandsB3F', 'KINGS_ROCK', 'Seafoam Islands B3F'],
   ['SeafoamIslandsB4F', 'DRAGON_SCALE', 'Seafoam Islands B4F']];
